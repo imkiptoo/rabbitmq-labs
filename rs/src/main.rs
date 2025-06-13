@@ -6,9 +6,11 @@ use serde::{Deserialize, Serialize};
 
 mod handlers;
 mod rabbitmq;
+mod redis_store;
 
 use handlers::*;
 use rabbitmq::RabbitMQConnection;
+use redis_store::RedisStore;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebSocketMessage {
@@ -21,6 +23,7 @@ pub struct AppState {
     pub rabbit: Arc<RabbitMQConnection>,
     pub broadcast_tx: broadcast::Sender<WebSocketMessage>,
     pub game_scores: Arc<Mutex<HashMap<String, u32>>>,
+    pub redis: Arc<RedisStore>,
 }
 
 #[tokio::main]
@@ -28,6 +31,7 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     let rabbit = Arc::new(RabbitMQConnection::new().await.expect("Failed to connect to RabbitMQ"));
+    let redis = Arc::new(RedisStore::new().await.expect("Failed to connect to Redis"));
     let (broadcast_tx, _) = broadcast::channel(100);
     let game_scores = Arc::new(Mutex::new(HashMap::new()));
 
@@ -35,6 +39,7 @@ async fn main() {
         rabbit,
         broadcast_tx,
         game_scores,
+        redis,
     };
 
     let state = Arc::new(state);
@@ -121,6 +126,13 @@ async fn main() {
         .and(with_state(api_state.clone()))
         .and_then(collaborative_drawing::clear_canvas);
 
+    let load_canvas_route = warp::path("api")
+        .and(warp::path("drawing"))
+        .and(warp::path("load"))
+        .and(warp::get())
+        .and(with_state(api_state.clone()))
+        .and_then(collaborative_drawing::load_canvas_state);
+
 
     let ws_state = state.clone();
     let websocket_route = warp::path("ws")
@@ -140,6 +152,7 @@ async fn main() {
         .or(drawing_event_route)
         .or(cursor_move_route)
         .or(clear_canvas_route)
+        .or(load_canvas_route)
         .or(websocket_route)
         .with(cors);
 

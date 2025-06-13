@@ -29,6 +29,7 @@
     if (canvas) {
       ctx = canvas.getContext('2d');
       setupCanvas();
+      loadCanvasState();
     }
     
     if (typeof window !== 'undefined') {
@@ -55,6 +56,32 @@
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+  }
+
+  async function loadCanvasState() {
+    if (!ctx) return;
+    
+    try {
+      const response = await fetch('http://localhost:3030/api/drawing/load');
+      const data = await response.json();
+      
+      if (data.success && data.events && data.events.length > 0) {
+        // Replay all drawing events
+        data.events.forEach(event => {
+          if (event.event_type === 'draw' && event.prev_x !== null && event.prev_y !== null) {
+            ctx.strokeStyle = event.color;
+            ctx.lineWidth = event.brush_size;
+            ctx.beginPath();
+            ctx.moveTo(event.prev_x, event.prev_y);
+            ctx.lineTo(event.x, event.y);
+            ctx.stroke();
+          }
+        });
+        console.log(`Loaded ${data.events.length} drawing events from server`);
+      }
+    } catch (error) {
+      console.error('Error loading canvas state:', error);
+    }
   }
   
   function handleWebSocketMessage(event) {

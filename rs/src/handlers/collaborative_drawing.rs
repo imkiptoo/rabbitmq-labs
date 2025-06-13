@@ -64,8 +64,13 @@ pub async fn handle_drawing_event(
         timestamp: timestamp.clone(),
     };
 
-    // Publish to RabbitMQ fanout exchange for real-time collaboration
+    // Save to Redis for persistence
     let event_json = serde_json::to_string(&drawing_event).unwrap_or_default();
+    if let Err(e) = state.redis.append_drawing_event(&event_json).await {
+        tracing::error!("Failed to save drawing event to Redis: {}", e);
+    }
+
+    // Publish to RabbitMQ fanout exchange for real-time collaboration
     if let Err(e) = state.rabbit.publish_fanout("collaborative_drawing", &event_json).await {
         tracing::error!("Failed to publish drawing event to RabbitMQ: {}", e);
     }
@@ -127,6 +132,11 @@ pub async fn handle_cursor_move(
 pub async fn clear_canvas(state: Arc<AppState>) -> Result<Json, warp::Rejection> {
     let timestamp = chrono::Utc::now().to_rfc3339();
     
+    // Clear Redis storage
+    if let Err(e) = state.redis.clear_canvas().await {
+        tracing::error!("Failed to clear canvas in Redis: {}", e);
+    }
+    
     // Publish clear event to RabbitMQ
     let clear_event = serde_json::json!({
         "action": "clear_canvas",
@@ -151,4 +161,34 @@ pub async fn clear_canvas(state: Arc<AppState>) -> Result<Json, warp::Rejection>
         "success": true,
         "message": "Canvas cleared successfully"
     })))
+}
+
+pub async fn load_canvas_state(state: Arc<AppState>) -> Result<Json, warp::Rejection> {
+    match state.redis.get_drawing_state().await {
+        Ok(Some(drawing_events)) => {
+            // Parse the JSON string to ensure it's valid
+            match serde_json::from_str::<serde_json::Value>(&drawing_events) {
+                Ok(events) => Ok(warp::reply::json(&serde_json::json!({
+                    "success": true,
+                    "events": events
+                }))),
+                Err(_) => Ok(warp::reply::json(&serde_json::json!({
+                    "success": true,
+                    "events": []
+                })))
+            }
+        },
+        Ok(None) => Ok(warp::reply::json(&serde_json::json!({
+            "success": true,
+            "events": []
+        }))),
+        Err(e) => {
+            tracing::error!("Failed to load canvas state from Redis: {}", e);
+            Ok(warp::reply::json(&serde_json::json!({
+                "success": false,
+                "error": "Failed to load canvas state",
+                "events": []
+            })))
+        }
+    }
 }
