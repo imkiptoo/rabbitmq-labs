@@ -8,6 +8,7 @@
   let ctx;
   let isDrawing = false;
   let userId = '';
+  let username = '';
   let userColor = '#FF0000';
   let brushSize = 3;
   let lastX = 0;
@@ -22,9 +23,24 @@
   
   let websocketHandler;
   
+  function updateUsername() {
+    if (typeof window !== 'undefined' && username.trim()) {
+      localStorage.setItem('canvas_username', username.trim());
+    }
+  }
+  
   onMount(() => {
     // Generate unique user ID
     userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    
+    // Load username from localStorage or set default
+    if (typeof window !== 'undefined') {
+      username = localStorage.getItem('canvas_username') || '';
+      if (!username) {
+        username = `User${Math.floor(Math.random() * 1000)}`;
+        localStorage.setItem('canvas_username', username);
+      }
+    }
     
     if (canvas) {
       ctx = canvas.getContext('2d');
@@ -103,6 +119,12 @@
           break;
         case 'clear_canvas':
           clearCanvas();
+          break;
+        case 'delete_user_strokes':
+          if (data.user_id !== userId) {
+            // Reload the canvas to reflect the deletion
+            loadCanvasState();
+          }
           break;
       }
     }
@@ -194,6 +216,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
+          username: username,
           event_type: eventType,
           x: x,
           y: y,
@@ -215,6 +238,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
+          username: username,
           x: x,
           y: y,
           color: userColor
@@ -239,6 +263,24 @@
       });
     } catch (error) {
       console.error('Error clearing canvas:', error);
+    }
+  }
+
+  async function handleDeleteMyStrokes() {
+    try {
+      await fetch('http://localhost:3030/api/drawing/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          username: username
+        })
+      });
+      // Clear and reload canvas to reflect changes
+      clearCanvas();
+      loadCanvasState();
+    } catch (error) {
+      console.error('Error deleting strokes:', error);
     }
   }
   
@@ -278,6 +320,18 @@
   <!-- Controls -->
   <div class="bg-white border rounded-lg p-4">
     <div class="flex flex-wrap items-center gap-4">
+      <!-- Username Input -->
+      <div class="flex items-center space-x-2">
+        <label class="text-sm font-medium text-gray-700">Username:</label>
+        <input
+          type="text"
+          bind:value={username}
+          on:blur={updateUsername}
+          on:keydown={(e) => e.key === 'Enter' && e.target.blur()}
+          class="px-3 py-1 border border-gray-300 rounded text-sm w-32"
+          placeholder="Enter your name"
+        />
+      </div>
       <!-- Color Picker -->
       <div class="flex items-center space-x-2">
         <label class="text-sm font-medium text-gray-700">Color:</label>
@@ -319,6 +373,15 @@
         disabled={!connected}
       >
         Clear Canvas
+      </button>
+
+      <!-- Delete My Strokes Button -->
+      <button
+        class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+        on:click={handleDeleteMyStrokes}
+        disabled={!connected}
+      >
+        Delete My Strokes
       </button>
       
       <!-- Cursor Toggle -->
@@ -369,7 +432,7 @@
               style="background-color: {cursor.color};"
             ></div>
             <div class="absolute top-5 left-0 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-              {cursor.user_id}
+              {cursor.username || cursor.user_id}
             </div>
           </div>
         {/each}
@@ -377,6 +440,7 @@
     </div>
     
     <div class="mt-4 text-sm text-gray-600">
+      <strong>Your Username:</strong> {username} | 
       <strong>Your ID:</strong> {userId} | 
       <strong>Active Cursors:</strong> {cursors.size}
     </div>
@@ -386,11 +450,13 @@
   <div class="bg-gray-50 p-4 rounded-lg">
     <h4 class="font-medium mb-2">How it works</h4>
     <ul class="text-sm text-gray-600 space-y-1">
+      <li>• Set your username - it's saved in your browser for next visit</li>
       <li>• Click and drag to draw on the canvas</li>
       <li>• All drawing events are broadcast via RabbitMQ fanout exchange</li>
-      <li>• See other users' cursors in real-time</li>
+      <li>• See other users' cursors with their usernames in real-time</li>
       <li>• Changes appear instantly across all connected sessions</li>
-      <li>• Use different colors and brush sizes</li>
+      <li>• Use "Delete My Strokes" to remove only your drawings</li>
+      <li>• Canvas state persists when you refresh the page</li>
       <li>• Works on both desktop and mobile devices</li>
     </ul>
   </div>

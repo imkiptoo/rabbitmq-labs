@@ -8,6 +8,7 @@ use crate::{AppState, WebSocketMessage};
 pub struct DrawingEvent {
     pub event_type: String,
     pub user_id: String,
+    pub username: String,
     pub x: f64,
     pub y: f64,
     pub prev_x: Option<f64>,
@@ -20,6 +21,7 @@ pub struct DrawingEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CursorEvent {
     pub user_id: String,
+    pub username: String,
     pub x: f64,
     pub y: f64,
     pub color: String,
@@ -29,6 +31,7 @@ pub struct CursorEvent {
 #[derive(Debug, Deserialize)]
 pub struct DrawingRequest {
     pub user_id: String,
+    pub username: String,
     pub x: f64,
     pub y: f64,
     pub prev_x: Option<f64>,
@@ -41,9 +44,16 @@ pub struct DrawingRequest {
 #[derive(Debug, Deserialize)]
 pub struct CursorMoveRequest {
     pub user_id: String,
+    pub username: String,
     pub x: f64,
     pub y: f64,
     pub color: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DeleteStrokesRequest {
+    pub user_id: String,
+    pub username: String,
 }
 
 pub async fn handle_drawing_event(
@@ -55,6 +65,7 @@ pub async fn handle_drawing_event(
     let drawing_event = DrawingEvent {
         event_type: request.event_type.clone(),
         user_id: request.user_id.clone(),
+        username: request.username.clone(),
         x: request.x,
         y: request.y,
         prev_x: request.prev_x,
@@ -103,6 +114,7 @@ pub async fn handle_cursor_move(
     
     let cursor_event = CursorEvent {
         user_id: request.user_id.clone(),
+        username: request.username.clone(),
         x: request.x,
         y: request.y,
         color: request.color.clone(),
@@ -191,4 +203,46 @@ pub async fn load_canvas_state(state: Arc<AppState>) -> Result<Json, warp::Rejec
             })))
         }
     }
+}
+
+pub async fn delete_user_strokes(
+    request: DeleteStrokesRequest,
+    state: Arc<AppState>,
+) -> Result<Json, warp::Rejection> {
+    let timestamp = chrono::Utc::now().to_rfc3339();
+    
+    // Remove user's strokes from Redis
+    if let Err(e) = state.redis.delete_user_strokes(&request.user_id).await {
+        tracing::error!("Failed to delete user strokes from Redis: {}", e);
+        return Ok(warp::reply::json(&serde_json::json!({
+            "success": false,
+            "error": "Failed to delete strokes"
+        })));
+    }
+    
+    // Broadcast delete event to all clients
+    let delete_event = serde_json::json!({
+        "action": "delete_user_strokes",
+        "user_id": request.user_id,
+        "username": request.username,
+        "timestamp": timestamp
+    });
+    
+    if let Err(e) = state.rabbit.publish_fanout("collaborative_drawing", &delete_event.to_string()).await {
+        tracing::error!("Failed to publish delete strokes to RabbitMQ: {}", e);
+    }
+
+    let websocket_message = WebSocketMessage {
+        demo_type: "collaborative_drawing".to_string(),
+        data: delete_event,
+    };
+
+    if let Err(_) = state.broadcast_tx.send(websocket_message) {
+        tracing::warn!("No WebSocket clients connected for delete strokes");
+    }
+
+    Ok(warp::reply::json(&serde_json::json!({
+        "success": true,
+        "message": "User strokes deleted successfully"
+    })))
 }

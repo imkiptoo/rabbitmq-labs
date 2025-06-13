@@ -133,6 +133,14 @@ async fn main() {
         .and(with_state(api_state.clone()))
         .and_then(collaborative_drawing::load_canvas_state);
 
+    let delete_strokes_route = warp::path("api")
+        .and(warp::path("drawing"))
+        .and(warp::path("delete"))
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_state(api_state.clone()))
+        .and_then(collaborative_drawing::delete_user_strokes);
+
 
     let ws_state = state.clone();
     let websocket_route = warp::path("ws")
@@ -153,6 +161,7 @@ async fn main() {
         .or(cursor_move_route)
         .or(clear_canvas_route)
         .or(load_canvas_route)
+        .or(delete_strokes_route)
         .or(websocket_route)
         .with(cors);
 
