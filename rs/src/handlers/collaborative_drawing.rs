@@ -56,6 +56,25 @@ pub struct DeleteStrokesRequest {
     pub username: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct PathPoint {
+    pub x: f64,
+    pub y: f64,
+    pub prev_x: Option<f64>,
+    pub prev_y: Option<f64>,
+    pub color: String,
+    pub brush_size: f64,
+    pub event_type: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SavePathRequest {
+    pub user_id: String,
+    pub username: String,
+    pub path: Vec<PathPoint>,
+}
+
+// Deprecated: Use handle_realtime_drawing_event for real-time events and handle_save_path for persistence
 pub async fn handle_drawing_event(
     request: DrawingRequest,
     state: Arc<AppState>,
@@ -103,6 +122,85 @@ pub async fn handle_drawing_event(
     Ok(warp::reply::json(&serde_json::json!({
         "success": true,
         "message": "Drawing event processed successfully"
+    })))
+}
+
+pub async fn handle_realtime_drawing_event(
+    request: DrawingRequest,
+    state: Arc<AppState>,
+) -> Result<Json, warp::Rejection> {
+    let timestamp = chrono::Utc::now().to_rfc3339();
+    
+    let drawing_event = DrawingEvent {
+        event_type: request.event_type.clone(),
+        user_id: request.user_id.clone(),
+        username: request.username.clone(),
+        x: request.x,
+        y: request.y,
+        prev_x: request.prev_x,
+        prev_y: request.prev_y,
+        color: request.color.clone(),
+        brush_size: request.brush_size,
+        timestamp: timestamp.clone(),
+    };
+
+    // Only publish to RabbitMQ for real-time collaboration (no Redis persistence)
+    let event_json = serde_json::to_string(&drawing_event).unwrap_or_default();
+    if let Err(e) = state.rabbit.publish_fanout("collaborative_drawing", &event_json).await {
+        tracing::error!("Failed to publish realtime drawing event to RabbitMQ: {}", e);
+    }
+
+    // Broadcast via WebSocket to all connected clients
+    let websocket_message = WebSocketMessage {
+        demo_type: "collaborative_drawing".to_string(),
+        data: serde_json::json!({
+            "action": "drawing_event",
+            "event": drawing_event,
+            "timestamp": timestamp
+        }),
+    };
+
+    if let Err(_) = state.broadcast_tx.send(websocket_message) {
+        tracing::warn!("No WebSocket clients connected for realtime drawing event");
+    }
+
+    Ok(warp::reply::json(&serde_json::json!({
+        "success": true,
+        "message": "Realtime drawing event processed successfully"
+    })))
+}
+
+pub async fn handle_save_path(
+    request: SavePathRequest,
+    state: Arc<AppState>,
+) -> Result<Json, warp::Rejection> {
+    let timestamp = chrono::Utc::now().to_rfc3339();
+    
+    // Convert path points to drawing events and save to Redis
+    for point in request.path {
+        let drawing_event = DrawingEvent {
+            event_type: point.event_type.clone(),
+            user_id: request.user_id.clone(),
+            username: request.username.clone(),
+            x: point.x,
+            y: point.y,
+            prev_x: point.prev_x,
+            prev_y: point.prev_y,
+            color: point.color.clone(),
+            brush_size: point.brush_size,
+            timestamp: timestamp.clone(),
+        };
+
+        // Save to Redis for persistence
+        let event_json = serde_json::to_string(&drawing_event).unwrap_or_default();
+        if let Err(e) = state.redis.append_drawing_event(&event_json).await {
+            tracing::error!("Failed to save path point to Redis: {}", e);
+        }
+    }
+
+    Ok(warp::reply::json(&serde_json::json!({
+        "success": true,
+        "message": "Path saved successfully"
     })))
 }
 

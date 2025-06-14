@@ -15,6 +15,7 @@
   let lastY = 0;
   let cursors = new Map();
   let showCursors = true;
+  let currentPath = [];
   
   const colors = [
     '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
@@ -163,7 +164,17 @@
     lastX = e.clientX - rect.left;
     lastY = e.clientY - rect.top;
     
-    sendDrawingEvent('start', lastX, lastY);
+    // Initialize new path
+    currentPath = [{
+      x: lastX,
+      y: lastY,
+      color: userColor,
+      brush_size: brushSize,
+      event_type: 'start'
+    }];
+    
+    // Send real-time event for immediate visual feedback
+    sendRealtimeDrawingEvent('start', lastX, lastY);
   }
   
   function draw(e) {
@@ -181,8 +192,19 @@
     ctx.lineTo(currentX, currentY);
     ctx.stroke();
     
-    // Send drawing event to other users
-    sendDrawingEvent('draw', currentX, currentY, lastX, lastY);
+    // Add to current path
+    currentPath.push({
+      x: currentX,
+      y: currentY,
+      prev_x: lastX,
+      prev_y: lastY,
+      color: userColor,
+      brush_size: brushSize,
+      event_type: 'draw'
+    });
+    
+    // Send real-time drawing event for immediate visual feedback
+    sendRealtimeDrawingEvent('draw', currentX, currentY, lastX, lastY);
     
     lastX = currentX;
     lastY = currentY;
@@ -191,7 +213,24 @@
   function stopDrawing() {
     if (!isDrawing) return;
     isDrawing = false;
-    sendDrawingEvent('end', lastX, lastY);
+    
+    // Add end point to path
+    currentPath.push({
+      x: lastX,
+      y: lastY,
+      color: userColor,
+      brush_size: brushSize,
+      event_type: 'end'
+    });
+    
+    // Send real-time end event
+    sendRealtimeDrawingEvent('end', lastX, lastY);
+    
+    // Save completed path to Redis
+    saveCompletedPath();
+    
+    // Clear current path
+    currentPath = [];
   }
   
   function handleMouseMove(e) {
@@ -209,9 +248,9 @@
     }
   }
   
-  async function sendDrawingEvent(eventType, x, y, prevX = null, prevY = null) {
+  async function sendRealtimeDrawingEvent(eventType, x, y, prevX = null, prevY = null) {
     try {
-      await fetch('http://localhost:3030/api/drawing/event', {
+      await fetch('http://localhost:3030/api/drawing/realtime', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -227,7 +266,25 @@
         })
       });
     } catch (error) {
-      console.error('Error sending drawing event:', error);
+      console.error('Error sending realtime drawing event:', error);
+    }
+  }
+  
+  async function saveCompletedPath() {
+    if (currentPath.length === 0) return;
+    
+    try {
+      await fetch('http://localhost:3030/api/drawing/save-path', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          username: username,
+          path: currentPath
+        })
+      });
+    } catch (error) {
+      console.error('Error saving completed path:', error);
     }
   }
   

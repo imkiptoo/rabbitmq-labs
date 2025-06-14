@@ -141,6 +141,22 @@ async fn main() {
         .and(with_state(api_state.clone()))
         .and_then(collaborative_drawing::delete_user_strokes);
 
+    let realtime_drawing_route = warp::path("api")
+        .and(warp::path("drawing"))
+        .and(warp::path("realtime"))
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_state(api_state.clone()))
+        .and_then(collaborative_drawing::handle_realtime_drawing_event);
+
+    let save_path_route = warp::path("api")
+        .and(warp::path("drawing"))
+        .and(warp::path("save-path"))
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_state(api_state.clone()))
+        .and_then(collaborative_drawing::handle_save_path);
+
 
     let ws_state = state.clone();
     let websocket_route = warp::path("ws")
@@ -162,6 +178,8 @@ async fn main() {
         .or(clear_canvas_route)
         .or(load_canvas_route)
         .or(delete_strokes_route)
+        .or(realtime_drawing_route)
+        .or(save_path_route)
         .or(websocket_route)
         .with(cors);
 
