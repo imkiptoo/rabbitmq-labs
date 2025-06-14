@@ -333,7 +333,14 @@
       </button>
       
       <div class="text-sm text-gray-600">
-        Active: {activeMessages.length} | Playing: {isPlaying ? 'Yes' : 'No'}
+        Active: {activeMessages.length} | Playing: {isPlaying ? 'Yes' : 'No'} | 
+        Highlighted: {currentDemo.connections.filter(conn => 
+          activeMessages.some(msg => {
+            if (msg.currentStep >= msg.path.length) return false;
+            const currentConnection = msg.path[msg.currentStep];
+            return currentConnection && currentConnection.from === conn.from && currentConnection.to === conn.to;
+          })
+        ).length}
       </div>
     </div>
     
@@ -363,26 +370,45 @@
         <!-- Connection lines -->
         {#each currentDemo.connections as connection}
           {@const isActive = activeMessages.some(msg => {
-            const activeConn = getActiveConnection(msg);
-            return activeConn && activeConn.from === connection.from && activeConn.to === connection.to;
+            if (msg.currentStep >= msg.path.length) return false;
+            const currentConnection = msg.path[msg.currentStep];
+            return currentConnection && currentConnection.from === connection.from && currentConnection.to === connection.to;
           })}
+          <!-- Base line (always visible) -->
           <path
             d={getConnectionPath(connection.from, connection.to)}
-            stroke={isActive ? "url(#activePathGradient)" : "#E5E7EB"}
-            stroke-width={isActive ? "4" : "2"}
+            stroke="#E5E7EB"
+            stroke-width="2"
             fill="none"
             marker-end="url(#arrowhead)"
-            class={isActive ? "active-path" : ""}
-          >
-            {#if isActive}
+          />
+          <!-- Active highlight line -->
+          {#if isActive}
+            <path
+              d={getConnectionPath(connection.from, connection.to)}
+              stroke="url(#pulsingPathGradient)"
+              stroke-width="6"
+              fill="none"
+              class="active-path"
+              stroke-linecap="round"
+            />
+            <!-- Additional glow effect -->
+            <path
+              d={getConnectionPath(connection.from, connection.to)}
+              stroke="url(#activePathGradient)"
+              stroke-width="8"
+              fill="none"
+              stroke-linecap="round"
+              opacity="0.4"
+            >
               <animate
-                attributeName="stroke-opacity"
-                values="0.5;1;0.5"
+                attributeName="opacity"
+                values="0.2;0.6;0.2"
                 dur="1.5s"
                 repeatCount="indefinite"
               />
-            {/if}
-          </path>
+            </path>
+          {/if}
         {/each}
         
         <!-- Animated messages -->
@@ -457,9 +483,22 @@
           
           <!-- Connection line gradient for active paths -->
           <linearGradient id="activePathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:0.3" />
-            <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:0.6" />
-            <stop offset="100%" style="stop-color:#10B981;stop-opacity:0.3" />
+            <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:0.8" />
+            <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#10B981;stop-opacity:0.8" />
+          </linearGradient>
+          
+          <!-- Pulsing highlight gradient -->
+          <linearGradient id="pulsingPathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#EF4444;stop-opacity:0.7">
+              <animate attributeName="stop-opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
+            </stop>
+            <stop offset="50%" style="stop-color:#F97316;stop-opacity:1">
+              <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+            </stop>
+            <stop offset="100%" style="stop-color:#EAB308;stop-opacity:0.7">
+              <animate attributeName="stop-opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
+            </stop>
           </linearGradient>
         </defs>
       </svg>
@@ -542,7 +581,7 @@
   }
   
   .active-path {
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 12px rgba(59, 130, 246, 0.4));
   }
   
   svg {
