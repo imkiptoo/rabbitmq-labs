@@ -10,7 +10,8 @@ const routes = {
   '/game': 'game',
   '/rpc': 'rpc',
   '/drawing': 'drawing',
-  '/simulator': 'simulator'
+  '/simulator': 'simulator',
+  '/comparison': 'comparison'
 };
 
 function updateRoute() {

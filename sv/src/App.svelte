@@ -11,6 +11,7 @@
   import RpcPage from './pages/RpcPage.svelte';
   import DrawingPage from './pages/DrawingPage.svelte';
   import SimulatorPage from './pages/SimulatorPage.svelte';
+  import ComparisonPage from './pages/ComparisonPage.svelte';
 
   let ws = null;
   let connected = false;
@@ -23,7 +24,8 @@
     game: GamePage,
     rpc: RpcPage,
     drawing: DrawingPage,
-    simulator: SimulatorPage
+    simulator: SimulatorPage,
+    comparison: ComparisonPage
   };
 
   onMount(() => {

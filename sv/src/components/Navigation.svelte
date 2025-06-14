@@ -10,6 +10,7 @@
   
   const navItems = [
     { id: 'home', name: 'Home', href: '/', icon: '🏠' },
+    { id: 'comparison', name: 'Traditional vs Broker', href: '/comparison', icon: '⚖️' },
     { id: 'logger', name: 'Message Logger', href: '/logger', icon: '📨' },
     { id: 'workers', name: 'Number Doubler', href: '/workers', icon: '⚙️' },
     { id: 'game', name: 'Race to 100', href: '/game', icon: '🏁' },
