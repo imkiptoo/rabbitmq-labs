@@ -27,6 +27,40 @@
         <p class="text-green-700">Receives and processes messages</p>
       </div>
     </div>
+    
+    <div class="mt-4">
+      <h3 class="text-md font-medium mb-3">Message Flow Diagram</h3>
+      <svg width="100%" height="120" viewBox="0 0 600 120" class="border rounded bg-gray-50">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#374151" />
+          </marker>
+        </defs>
+        
+        <!-- Producer -->
+        <rect x="20" y="30" width="80" height="60" rx="8" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
+        <text x="60" y="55" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Producer</text>
+        <text x="60" y="70" text-anchor="middle" fill="white" font-size="10">Sends Messages</text>
+        
+        <!-- Arrow 1 -->
+        <line x1="100" y1="60" x2="160" y2="60" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+        <text x="130" y="55" text-anchor="middle" fill="#374151" font-size="10">publish</text>
+        
+        <!-- Queue -->
+        <rect x="180" y="30" width="80" height="60" rx="8" fill="#F59E0B" stroke="#D97706" stroke-width="2"/>
+        <text x="220" y="55" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Queue</text>
+        <text x="220" y="70" text-anchor="middle" fill="white" font-size="10">"messages"</text>
+        
+        <!-- Arrow 2 -->
+        <line x1="260" y1="60" x2="320" y2="60" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+        <text x="290" y="55" text-anchor="middle" fill="#374151" font-size="10">consume</text>
+        
+        <!-- Consumer -->
+        <rect x="340" y="30" width="80" height="60" rx="8" fill="#10B981" stroke="#059669" stroke-width="2"/>
+        <text x="380" y="55" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Consumer</text>
+        <text x="380" y="70" text-anchor="middle" fill="white" font-size="10">Processes</text>
+      </svg>
+    </div>
   </div>
   
   <MessageLogger {ws} {connected} />
