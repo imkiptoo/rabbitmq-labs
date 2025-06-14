@@ -3,13 +3,14 @@
   
   export let ws;
   export let connected;
-  
-  let selectedDemo = 'logger';
+  export let demoType = 'logger';
+
+  let selectedDemo = demoType; // Lock to the specific demo type
   let messages = [];
   let isPlaying = true;
   let animationSpeed = 1000;
   let animationDuration = 2;
-  
+
   const demos = {
     logger: {
       name: 'Simple Queue',
@@ -104,11 +105,11 @@
       ]
     }
   };
-  
+
   let currentDemo = demos[selectedDemo];
   let activeMessages = [];
   let animationFrame;
-  
+
   onMount(() => {
     if (typeof window !== 'undefined') {
       window.addEventListener('websocket-message', handleWebSocketMessage);
@@ -121,10 +122,9 @@
       };
     }
   });
-  
+
   function startAnimationLoop() {
     function animate() {
-      // Force reactivity update for message positions
       if (activeMessages.length > 0) {
         activeMessages = [...activeMessages];
       }
@@ -132,29 +132,29 @@
     }
     animate();
   }
-  
+
   function handleWebSocketMessage(event) {
     const message = event.detail;
-    addMessage({
-      id: Date.now(),
-      demo: message.demo_type,
-      data: message.data,
-      timestamp: new Date().toLocaleTimeString()
-    });
+    if (message.demo_type === selectedDemo) {
+      addMessage({
+        id: Date.now(),
+        demo: message.demo_type,
+        data: message.data,
+        timestamp: new Date().toLocaleTimeString()
+      });
+    }
   }
-  
+
   function addMessage(message) {
     messages = [message, ...messages].slice(0, 20);
     if (isPlaying) {
       animateMessage(message);
     }
   }
-  
+
   function animateMessage(message) {
     const messageId = `msg-${Date.now()}-${Math.random()}`;
     const connections = currentDemo.connections;
-    
-    console.log('Starting animation for message:', messageId, 'with connections:', connections);
     
     const newActiveMessage = {
       id: messageId,
@@ -166,11 +166,9 @@
     };
     
     activeMessages = [...activeMessages, newActiveMessage];
-    console.log('Active messages:', activeMessages.length);
-    
     animateMessageFlow(messageId);
   }
-  
+
   function animateMessageFlow(messageId) {
     const messageIndex = activeMessages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
@@ -192,7 +190,7 @@
       }, animationSpeed);
     }
   }
-  
+
   function getMessagePosition(message) {
     if (message.currentStep >= message.path.length) return null;
     
@@ -202,15 +200,11 @@
     
     if (!fromNode || !toNode) return null;
     
-    // Calculate elapsed time for current step
     const stepStartTime = message.startTime + (message.currentStep * animationSpeed);
     const elapsed = Date.now() - stepStartTime;
     const progress = Math.max(0, Math.min(elapsed / animationSpeed, 1));
-    
-    // Use easing function for smoother movement
     const easedProgress = easeInOutCubic(progress);
     
-    // Use same coordinates as connection path - match the getConnectionPath logic
     const getNodeWidth = (node) => {
       if (node.type === 'exchange') return 160;
       return node.label.length > 10 ? 130 : 100;
@@ -221,22 +215,17 @@
     
     let startX, startY, endX, endY;
     
-    // Special case for RPC pattern - server to reply_queue connection
     if (connection.from === 'server' && connection.to === 'reply_queue') {
-      startX = fromNode.x; // Center horizontally
-      startY = fromNode.y + 20; // Bottom of server box
-      endX = toNode.x + (toWidth / 2); // Right edge of reply queue
-      endY = toNode.y; // Center vertically of reply queue
-    }
-    // Special case for RPC pattern - reply_queue to client connection  
-    else if (connection.from === 'reply_queue' && connection.to === 'client') {
+      startX = fromNode.x;
+      startY = fromNode.y + 20;
+      endX = toNode.x + (toWidth / 2);
+      endY = toNode.y;
+    } else if (connection.from === 'reply_queue' && connection.to === 'client') {
       startX = fromNode.x - (fromWidth / 2);
       startY = fromNode.y;
       endX = toNode.x;
       endY = toNode.y + 20;
-    }
-    // Default horizontal connections
-    else {
+    } else {
       startX = fromNode.x + (fromWidth / 2);
       startY = fromNode.y;
       endX = toNode.x - (toWidth / 2);
@@ -248,31 +237,20 @@
     
     return { x: currentX, y: currentY, progress: easedProgress };
   }
-  
+
   function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
-  
-  function getActiveConnection(message) {
-    if (message.currentStep >= message.path.length) return null;
-    return message.path[message.currentStep];
-  }
-  
-  function changeDemo(demoId) {
-    selectedDemo = demoId;
-    currentDemo = demos[demoId];
-    activeMessages = [];
-  }
-  
+
   function togglePlayback() {
     isPlaying = !isPlaying;
   }
-  
+
   function clearMessages() {
     messages = [];
     activeMessages = [];
   }
-  
+
   function simulateMessage() {
     const demoMessages = {
       logger: { message: 'Hello from simulator!' },
@@ -289,10 +267,9 @@
       timestamp: new Date().toLocaleTimeString()
     };
     
-    console.log('Simulating message:', newMessage);
     addMessage(newMessage);
   }
-  
+
   function getNodeColor(type) {
     switch (type) {
       case 'producer': return '#3B82F6';
@@ -302,14 +279,13 @@
       default: return '#6B7280';
     }
   }
-  
+
   function getConnectionPath(from, to) {
     const fromNode = currentDemo.nodes.find(n => n.id === from);
     const toNode = currentDemo.nodes.find(n => n.id === to);
     
     if (!fromNode || !toNode) return '';
     
-    // Calculate box widths based on node type and label length
     const getNodeWidth = (node) => {
       if (node.type === 'exchange') return 160;
       return node.label.length > 10 ? 130 : 100;
@@ -320,24 +296,17 @@
     
     let fromX, fromY, toX, toY;
     
-    // Special case for RPC pattern - server to reply_queue connection
     if (from === 'server' && to === 'reply_queue') {
-      // Arrow goes from bottom center of server to right middle of reply queue
-      fromX = fromNode.x; // Center horizontally
-      fromY = fromNode.y + 20; // Bottom of server box (h-12 = 48px / 2 = 24px)
-      toX = toNode.x + (toWidth / 2); // Right edge of reply queue
-      toY = toNode.y; // Center vertically of reply queue
-    }
-    // Special case for RPC pattern - reply_queue to client connection  
-    else if (from === 'reply_queue' && to === 'client') {
-      // Arrow goes from left center of reply queue to bottom center of client
+      fromX = fromNode.x;
+      fromY = fromNode.y + 20;
+      toX = toNode.x + (toWidth / 2);
+      toY = toNode.y;
+    } else if (from === 'reply_queue' && to === 'client') {
       fromX = fromNode.x - (fromWidth / 2);
       fromY = fromNode.y;
       toX = toNode.x;
-      toY = toNode.y + 20; // Bottom of client box
-    }
-    // Default horizontal connections
-    else {
+      toY = toNode.y + 20;
+    } else {
       fromX = fromNode.x + (fromWidth / 2);
       fromY = fromNode.y;
       toX = toNode.x - (toWidth / 2);
@@ -346,30 +315,12 @@
     
     return `M ${fromX} ${fromY} L ${toX} ${toY}`;
   }
-
 </script>
 
 <div class="space-y-6">
   <div class="bg-blue-50 p-4 rounded-lg">
-    <h2 class="text-xl font-semibold text-blue-900 mb-2">Message Flow Simulator</h2>
-    <p class="text-blue-700">Visualize how messages flow through RabbitMQ patterns in real-time</p>
-  </div>
-  
-  <!-- Demo Selection -->
-  <div class="grid grid-cols-5 gap-2">
-    {#each Object.entries(demos) as [id, demo]}
-      <button
-        class="p-3 rounded-lg border-2 text-left transition-colors {
-          selectedDemo === id 
-            ? 'border-blue-500 bg-blue-50 text-blue-900' 
-            : 'border-gray-200 hover:border-gray-300'
-        }"
-        on:click={() => changeDemo(id)}
-      >
-        <div class="font-medium">{demo.name}</div>
-        <div class="text-xs text-gray-600 mt-1">{demo.description}</div>
-      </button>
-    {/each}
+    <h2 class="text-xl font-semibold text-blue-900 mb-2">Flow Simulator - {currentDemo.name}</h2>
+    <p class="text-blue-700">{currentDemo.description}</p>
   </div>
   
   <!-- Controls -->
@@ -557,21 +508,6 @@
                   repeatCount="indefinite"
                 />
               </circle>
-              
-              <!-- Data label -->
-              <!--<text
-                x={position.x}
-                y={position.y - 18}
-                text-anchor="middle"
-                fill="#374151"
-                font-size="12"
-                font-weight="bold"
-                class="message-label"
-              >
-                {typeof message.data === 'object' ? 
-                  Object.keys(message.data)[0] : 
-                  String(message.data).substring(0, 8)}
-              </text>-->
             </g>
           {/if}
         {/each}
@@ -581,11 +517,6 @@
           <marker id="arrowhead" markerWidth="10" markerHeight="7" 
             refX="5" refY="3.5" orient="auto">
             <polygon points="0 0, 5 3.5, 0 7" fill="#d0d0d0" />
-          </marker>
-          
-          <marker id="arrowhead-active" markerWidth="10" markerHeight="7" 
-            refX="5" refY="3.5" orient="auto">
-            <polygon points="0 0, 5 3.5, 0 7" fill="#FF4444" />
           </marker>
           
           <marker id="arrowhead-active-animated" markerWidth="10" markerHeight="7" 
@@ -605,26 +536,6 @@
             <stop offset="0%" style="stop-color:#FCA5A5;stop-opacity:1" />
             <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
           </radialGradient>
-          
-          <!-- Connection line gradient for active paths -->
-          <linearGradient id="activePathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:0.8" />
-            <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#10B981;stop-opacity:0.8" />
-          </linearGradient>
-          
-          <!-- Pulsing highlight gradient -->
-          <linearGradient id="pulsingPathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:#EF4444;stop-opacity:0.7">
-              <animate attributeName="stop-opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
-            </stop>
-            <stop offset="50%" style="stop-color:#F97316;stop-opacity:1">
-              <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
-            </stop>
-            <stop offset="100%" style="stop-color:#EAB308;stop-opacity:0.7">
-              <animate attributeName="stop-opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
-            </stop>
-          </linearGradient>
         </defs>
       </svg>
       
@@ -647,13 +558,13 @@
   <div class="bg-white border rounded-lg">
     <div class="p-4 border-b bg-gray-50">
       <h3 class="font-semibold">Message Log</h3>
-      <p class="text-sm text-gray-600">Real-time messages from all demos</p>
+      <p class="text-sm text-gray-600">Real-time messages for {currentDemo.name}</p>
     </div>
     
     <div class="max-h-48 overflow-y-auto">
       {#if messages.length === 0}
         <div class="p-4 text-center text-gray-500">
-          No messages yet. Try interacting with other demos or use "Simulate Message".
+          No messages yet. Try using the demo above or click "Simulate Message".
         </div>
       {:else}
         {#each messages as message}
@@ -705,15 +616,6 @@
     filter: blur(1px);
   }
   
-  .message-label {
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
-    pointer-events: none;
-  }
-  
-  .active-path {
-    filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 3px rgba(59, 130, 246, 0.4));
-  }
-  
   .active-path-core {
     filter: drop-shadow(0 0 4px rgba(255, 68, 68, 1)) 
             drop-shadow(0 0 8px rgba(255, 107, 53, 0.8)) 
@@ -722,18 +624,5 @@
   
   svg {
     overflow: visible;
-  }
-  
-  .animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: .5;
-    }
   }
 </style>
