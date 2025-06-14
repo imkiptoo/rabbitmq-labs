@@ -6,8 +6,9 @@
   
   let selectedDemo = 'logger';
   let messages = [];
-  let isPlaying = false;
+  let isPlaying = true;
   let animationSpeed = 1000;
+  let animationDuration = 2;
   
   const demos = {
     logger: {
@@ -106,15 +107,31 @@
   
   let currentDemo = demos[selectedDemo];
   let activeMessages = [];
+  let animationFrame;
   
   onMount(() => {
     if (typeof window !== 'undefined') {
       window.addEventListener('websocket-message', handleWebSocketMessage);
+      startAnimationLoop();
       return () => {
         window.removeEventListener('websocket-message', handleWebSocketMessage);
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+        }
       };
     }
   });
+  
+  function startAnimationLoop() {
+    function animate() {
+      // Force reactivity update for message positions
+      if (activeMessages.length > 0) {
+        activeMessages = [...activeMessages];
+      }
+      animationFrame = requestAnimationFrame(animate);
+    }
+    animate();
+  }
   
   function handleWebSocketMessage(event) {
     const message = event.detail;
@@ -128,21 +145,28 @@
   
   function addMessage(message) {
     messages = [message, ...messages].slice(0, 20);
-    if (message.demo === selectedDemo && isPlaying) {
+    if (isPlaying) {
       animateMessage(message);
     }
   }
   
   function animateMessage(message) {
-    const messageId = `msg-${Date.now()}`;
+    const messageId = `msg-${Date.now()}-${Math.random()}`;
     const connections = currentDemo.connections;
     
-    activeMessages = [...activeMessages, {
+    console.log('Starting animation for message:', messageId, 'with connections:', connections);
+    
+    const newActiveMessage = {
       id: messageId,
       path: connections,
       currentStep: 0,
-      data: message.data
-    }];
+      data: message.data,
+      startTime: Date.now(),
+      totalDuration: connections.length * animationSpeed
+    };
+    
+    activeMessages = [...activeMessages, newActiveMessage];
+    console.log('Active messages:', activeMessages.length);
     
     animateMessageFlow(messageId);
   }
@@ -156,17 +180,54 @@
     if (message.currentStep < message.path.length) {
       setTimeout(() => {
         message.currentStep++;
-        activeMessages = activeMessages;
+        activeMessages = [...activeMessages];
         
         if (message.currentStep < message.path.length) {
           animateMessageFlow(messageId);
         } else {
           setTimeout(() => {
             activeMessages = activeMessages.filter(m => m.id !== messageId);
-          }, 1000);
+          }, 500);
         }
       }, animationSpeed);
     }
+  }
+  
+  function getMessagePosition(message) {
+    if (message.currentStep >= message.path.length) return null;
+    
+    const connection = message.path[message.currentStep];
+    const fromNode = currentDemo.nodes.find(n => n.id === connection.from);
+    const toNode = currentDemo.nodes.find(n => n.id === connection.to);
+    
+    if (!fromNode || !toNode) return null;
+    
+    // Calculate elapsed time for current step
+    const stepStartTime = message.startTime + (message.currentStep * animationSpeed);
+    const elapsed = Date.now() - stepStartTime;
+    const progress = Math.max(0, Math.min(elapsed / animationSpeed, 1));
+    
+    // Use easing function for smoother movement
+    const easedProgress = easeInOutCubic(progress);
+    
+    const startX = fromNode.x + 40;
+    const startY = fromNode.y + 20;
+    const endX = toNode.x;
+    const endY = toNode.y + 20;
+    
+    const currentX = startX + (endX - startX) * easedProgress;
+    const currentY = startY + (endY - startY) * easedProgress;
+    
+    return { x: currentX, y: currentY, progress: easedProgress };
+  }
+  
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  
+  function getActiveConnection(message) {
+    if (message.currentStep >= message.path.length) return null;
+    return message.path[message.currentStep];
   }
   
   function changeDemo(demoId) {
@@ -193,12 +254,15 @@
       drawing: { user: 'SimUser', color: '#FF0000', points: [{x: 100, y: 100}, {x: 150, y: 150}] }
     };
     
-    addMessage({
+    const newMessage = {
       id: Date.now(),
       demo: selectedDemo,
       data: demoMessages[selectedDemo],
       timestamp: new Date().toLocaleTimeString()
-    });
+    };
+    
+    console.log('Simulating message:', newMessage);
+    addMessage(newMessage);
   }
   
   function getNodeColor(type) {
@@ -267,14 +331,19 @@
       >
         Clear
       </button>
+      
+      <div class="text-sm text-gray-600">
+        Active: {activeMessages.length} | Playing: {isPlaying ? 'Yes' : 'No'}
+      </div>
     </div>
     
     <div class="flex items-center space-x-2">
       <label class="text-sm text-gray-600">Speed:</label>
       <input
         type="range"
-        min="200"
-        max="2000"
+        min="500"
+        max="3000"
+        step="100"
         bind:value={animationSpeed}
         class="w-20"
       />
@@ -293,39 +362,105 @@
       <svg width="100%" height="100%" class="absolute inset-0">
         <!-- Connection lines -->
         {#each currentDemo.connections as connection}
+          {@const isActive = activeMessages.some(msg => {
+            const activeConn = getActiveConnection(msg);
+            return activeConn && activeConn.from === connection.from && activeConn.to === connection.to;
+          })}
           <path
             d={getConnectionPath(connection.from, connection.to)}
-            stroke="#E5E7EB"
-            stroke-width="2"
+            stroke={isActive ? "url(#activePathGradient)" : "#E5E7EB"}
+            stroke-width={isActive ? "4" : "2"}
             fill="none"
             marker-end="url(#arrowhead)"
-          />
+            class={isActive ? "active-path" : ""}
+          >
+            {#if isActive}
+              <animate
+                attributeName="stroke-opacity"
+                values="0.5;1;0.5"
+                dur="1.5s"
+                repeatCount="indefinite"
+              />
+            {/if}
+          </path>
         {/each}
         
         <!-- Animated messages -->
         {#each activeMessages as message}
-          {#if message.currentStep < message.path.length}
-            {@const currentConnection = message.path[message.currentStep]}
-            {@const fromNode = currentDemo.nodes.find(n => n.id === currentConnection.from)}
-            {@const toNode = currentDemo.nodes.find(n => n.id === currentConnection.to)}
-            {#if fromNode && toNode}
+          {@const position = getMessagePosition(message)}
+          {#if position}
+            <g>
+              <!-- Message packet with glow effect -->
               <circle
-                cx={fromNode.x + 40 + (toNode.x - fromNode.x - 40) * 0.5}
-                cy={fromNode.y + 20 + (toNode.y - fromNode.y) * 0.5}
-                r="6"
-                fill="#EF4444"
-                class="animate-pulse"
-              />
-            {/if}
+                cx={position.x}
+                cy={position.y}
+                r="8"
+                fill="url(#messageGradient)"
+                stroke="#EF4444"
+                stroke-width="2"
+                class="message-packet"
+              >
+                <animate
+                  attributeName="r"
+                  values="6;10;6"
+                  dur="0.8s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+              
+              <!-- Glow effect -->
+              <circle
+                cx={position.x}
+                cy={position.y}
+                r="12"
+                fill="rgba(239, 68, 68, 0.3)"
+                class="message-glow"
+              >
+                <animate
+                  attributeName="opacity"
+                  values="0.3;0.7;0.3"
+                  dur="1s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+              
+              <!-- Data label -->
+              <text
+                x={position.x}
+                y={position.y - 18}
+                text-anchor="middle"
+                fill="#374151"
+                font-size="10"
+                font-weight="bold"
+                class="message-label"
+              >
+                {typeof message.data === 'object' ? 
+                  Object.keys(message.data)[0] : 
+                  String(message.data).substring(0, 8)}
+              </text>
+            </g>
           {/if}
         {/each}
         
-        <!-- Arrow marker definition -->
+        <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" 
             refX="10" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="#E5E7EB" />
           </marker>
+          
+          <!-- Message gradient -->
+          <radialGradient id="messageGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#FCA5A5;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
+          </radialGradient>
+          
+          <!-- Connection line gradient for active paths -->
+          <linearGradient id="activePathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:0.3" />
+            <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:0.6" />
+            <stop offset="100%" style="stop-color:#10B981;stop-opacity:0.3" />
+          </linearGradient>
         </defs>
       </svg>
       
@@ -391,3 +526,39 @@
     </div>
   </div>
 </div>
+
+<style>
+  .message-packet {
+    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
+  }
+  
+  .message-glow {
+    filter: blur(2px);
+  }
+  
+  .message-label {
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+  }
+  
+  .active-path {
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+  }
+  
+  svg {
+    overflow: visible;
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .5;
+    }
+  }
+</style>
