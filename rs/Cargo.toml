@@ -3,6 +3,10 @@ name = "rabbitmq-demos"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "rpc_worker"
+path = "src/bin/rpc_worker.rs"
+
 [dependencies]
 lapin = "2.3"
 tokio = { version = "1.0", features = ["full"] }

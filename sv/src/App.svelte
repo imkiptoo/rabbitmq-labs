@@ -138,8 +138,8 @@
         ></div>
 
         <!-- Mobile Menu -->
-        <div class="relative bg-white w-64 h-full shadow-lg">
-          <div class="flex items-center justify-between p-4 border-b">
+        <div class="relative bg-white w-60 h-full shadow-lg">
+          <div class="flex items-center justify-between px-3 h-11 border-b">
             <span class="text-lg font-semibold text-neutral-800">Menu</span>
             <button
               class="p-2 rounded-lg text-neutral-600 hover:bg-neutral-100"
