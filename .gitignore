@@ -26,3 +26,7 @@ Thumbs.db
 .env
 .env.local
 .env.production
+
+# Claude  AI files
+claude-*.json
+.claude/
