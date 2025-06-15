@@ -152,17 +152,21 @@
   
   function animateMessage(message) {
     const messageId = `msg-${Date.now()}-${Math.random()}`;
-    const connections = currentDemo.connections;
     
-    console.log('Starting animation for message:', messageId, 'with connections:', connections);
+    // For fanout patterns, we need to handle the flow differently
+    // Start with just the first connection (producer to exchange)
+    const firstConnection = currentDemo.connections[0];
+    
+    console.log('Starting animation for message:', messageId);
     
     const newActiveMessage = {
       id: messageId,
-      path: connections,
+      path: [firstConnection], // Start with just the first connection
       currentStep: 0,
       data: message.data,
       startTime: Date.now(),
-      totalDuration: connections.length * animationSpeed
+      totalDuration: animationSpeed,
+      isOriginal: true // Mark this as the original message
     };
     
     activeMessages = [...activeMessages, newActiveMessage];
@@ -182,15 +186,76 @@
         message.currentStep++;
         activeMessages = [...activeMessages];
         
+        // Check if we just reached an exchange node and need to fanout
+        if (message.currentStep >= message.path.length && message.isOriginal) {
+          const lastConnection = message.path[message.path.length - 1];
+          const targetNode = currentDemo.nodes.find(n => n.id === lastConnection.to);
+          
+          // If we reached an exchange, create fanout messages
+          if (targetNode && targetNode.type === 'exchange') {
+            createFanoutMessages(messageId, targetNode.id);
+          }
+        }
+        
         if (message.currentStep < message.path.length) {
           animateMessageFlow(messageId);
         } else {
+          // Remove message after a short delay
           setTimeout(() => {
             activeMessages = activeMessages.filter(m => m.id !== messageId);
           }, 500);
         }
       }, animationSpeed);
     }
+  }
+  
+  function createFanoutMessages(originalMessageId, exchangeId) {
+    const originalMessage = activeMessages.find(m => m.id === originalMessageId);
+    if (!originalMessage) return;
+    
+    // Find all connections FROM this exchange
+    const fanoutConnections = currentDemo.connections.filter(conn => conn.from === exchangeId);
+    
+    console.log('Creating fanout messages from exchange:', exchangeId, 'to', fanoutConnections.length, 'destinations');
+    
+    // Create simultaneous messages for each fanout connection
+    fanoutConnections.forEach((connection, index) => {
+      const fanoutMessageId = `fanout-${Date.now()}-${index}`;
+      
+      // Find the complete path from this queue to its consumer
+      const remainingPath = findRemainingPath(connection);
+      
+      const fanoutMessage = {
+        id: fanoutMessageId,
+        path: remainingPath,
+        currentStep: 0,
+        data: originalMessage.data,
+        startTime: Date.now(),
+        totalDuration: remainingPath.length * animationSpeed,
+        isOriginal: false
+      };
+      
+      activeMessages = [...activeMessages, fanoutMessage];
+      
+      // Start animation immediately (simultaneous)
+      animateMessageFlow(fanoutMessageId);
+    });
+  }
+  
+  function findRemainingPath(startConnection) {
+    const path = [startConnection];
+    let currentNodeId = startConnection.to;
+    
+    // Follow the path from the queue to the final consumer
+    while (true) {
+      const nextConnection = currentDemo.connections.find(conn => conn.from === currentNodeId);
+      if (!nextConnection) break;
+      
+      path.push(nextConnection);
+      currentNodeId = nextConnection.to;
+    }
+    
+    return path;
   }
   
   function getMessagePosition(message) {
@@ -511,14 +576,18 @@
         {#each activeMessages as message}
           {@const position = getMessagePosition(message)}
           {#if position}
+            {@const isOriginal = message.isOriginal !== false}
+            {@const messageColor = isOriginal ? "#FF4444" : "#10B981"}
+            {@const glowColor = isOriginal ? "rgba(255, 68, 68, 0.4)" : "rgba(16, 185, 129, 0.4)"}
             <g>
               <!-- Message packet with glow effect -->
+              <!-- Use different colors for original vs fanout messages -->
               <circle
                 cx={position.x}
                 cy={position.y}
                 r="2"
-                fill="url(#messageGradient)"
-                stroke="#FF4444"
+                fill="url(#{isOriginal ? 'messageGradient' : 'fanoutMessageGradient'})"
+                stroke={messageColor}
                 stroke-width="1"
                 class="message-packet"
               >
@@ -530,7 +599,7 @@
                 />
                 <animate
                   attributeName="stroke"
-                  values="#FF4444;#FF6B35;#FFA500;#FF6B35;#FF4444"
+                  values="{messageColor};{isOriginal ? '#FF6B35' : '#34D399'};{isOriginal ? '#FFA500' : '#6EE7B7'};{isOriginal ? '#FF6B35' : '#34D399'};{messageColor}"
                   dur="1.5s"
                   repeatCount="indefinite"
                 />
@@ -541,7 +610,7 @@
                 cx={position.x}
                 cy={position.y}
                 r="4"
-                fill="rgba(255, 68, 68, 0.4)"
+                fill={glowColor}
                 class="message-glow"
               >
                 <animate
@@ -604,6 +673,12 @@
           <radialGradient id="messageGradient" cx="50%" cy="50%" r="50%">
             <stop offset="0%" style="stop-color:#FCA5A5;stop-opacity:1" />
             <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
+          </radialGradient>
+          
+          <!-- Fanout message gradient (green for fanout messages) -->
+          <radialGradient id="fanoutMessageGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#A7F3D0;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#10B981;stop-opacity:1" />
           </radialGradient>
           
           <!-- Connection line gradient for active paths -->
@@ -673,7 +748,7 @@
   <!-- Legend -->
   <div class="bg-neutral-50 p-4 rounded-lg">
     <h4 class="font-medium mb-2">Legend</h4>
-    <div class="grid grid-cols-4 gap-4 text-sm">
+    <div class="grid grid-cols-4 gap-4 text-sm mb-3">
       <div class="flex items-center space-x-2">
         <div class="w-4 h-4 rounded" style="background-color: #3B82F6"></div>
         <span>Producer</span>
@@ -689,6 +764,16 @@
       <div class="flex items-center space-x-2">
         <div class="w-4 h-4 rounded" style="background-color: #8B5CF6"></div>
         <span>Exchange</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm border-t pt-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 rounded-full" style="background-color: #EF4444"></div>
+        <span>Original Message</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 rounded-full" style="background-color: #10B981"></div>
+        <span>Fanout Message (Simultaneous)</span>
       </div>
     </div>
   </div>
