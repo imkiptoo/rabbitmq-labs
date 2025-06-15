@@ -362,41 +362,41 @@
         class="p-3 rounded-lg border-2 text-left transition-colors {
           selectedDemo === id 
             ? 'border-blue-500 bg-blue-50 text-blue-900' 
-            : 'border-gray-200 hover:border-gray-300'
+            : 'border-neutral-200 hover:border-neutral-300'
         }"
         on:click={() => changeDemo(id)}
       >
         <div class="font-medium">{demo.name}</div>
-        <div class="text-xs text-gray-600 mt-1">{demo.description}</div>
+        <div class="text-xs text-neutral-600 mt-1">{demo.description}</div>
       </button>
     {/each}
   </div>
   
   <!-- Controls -->
-  <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+  <div class="flex items-center justify-between bg-neutral-50 p-4 rounded-lg">
     <div class="flex items-center space-x-4">
       <button
-        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         on:click={togglePlayback}
       >
         {isPlaying ? 'Pause' : 'Play'} Animation
       </button>
       
       <button
-        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+        class="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         on:click={simulateMessage}
       >
         Simulate Message
       </button>
       
       <button
-        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
         on:click={clearMessages}
       >
         Clear
       </button>
       
-      <div class="text-sm text-gray-600">
+      <div class="text-sm text-neutral-600">
         Active: {activeMessages.length} | Playing: {isPlaying ? 'Yes' : 'No'} | 
         Highlighted: {currentDemo.connections.filter(conn => 
           activeMessages.some(msg => {
@@ -409,7 +409,7 @@
     </div>
     
     <div class="flex items-center space-x-2">
-      <label class="text-sm text-gray-600">Speed:</label>
+      <label class="text-sm text-neutral-600">Speed:</label>
       <input
         type="range"
         min="500"
@@ -418,7 +418,7 @@
         bind:value={animationSpeed}
         class="w-20"
       />
-      <span class="text-sm text-gray-600">{animationSpeed}ms</span>
+      <span class="text-sm text-neutral-600">{animationSpeed}ms</span>
     </div>
   </div>
   
@@ -426,7 +426,7 @@
   <div class="bg-white border rounded-lg p-6">
     <div class="mb-4">
       <h3 class="text-lg font-semibold">{currentDemo.name}</h3>
-      <p class="text-gray-600">{currentDemo.description}</p>
+      <p class="text-neutral-600">{currentDemo.description}</p>
     </div>
     
     <div class="relative h-96 overflow-hidden">
@@ -645,25 +645,25 @@
   
   <!-- Message Log -->
   <div class="bg-white border rounded-lg">
-    <div class="p-4 border-b bg-gray-50">
+    <div class="p-4 border-b bg-neutral-50">
       <h3 class="font-semibold">Message Log</h3>
-      <p class="text-sm text-gray-600">Real-time messages from all demos</p>
+      <p class="text-sm text-neutral-600">Real-time messages from all demos</p>
     </div>
     
     <div class="max-h-48 overflow-y-auto">
       {#if messages.length === 0}
-        <div class="p-4 text-center text-gray-500">
+        <div class="p-4 text-center text-neutral-500">
           No messages yet. Try interacting with other demos or use "Simulate Message".
         </div>
       {:else}
         {#each messages as message}
-          <div class="flex items-center justify-between p-3 border-b border-gray-100 hover:bg-gray-50">
+          <div class="flex items-center justify-between p-3 border-b border-neutral-100 hover:bg-neutral-50">
             <div class="flex items-center space-x-3">
               <div class="w-2 h-2 rounded-full bg-blue-500"></div>
               <span class="font-medium text-blue-600">{message.demo}</span>
-              <span class="text-sm text-gray-600">{JSON.stringify(message.data)}</span>
+              <span class="text-sm text-neutral-600">{JSON.stringify(message.data)}</span>
             </div>
-            <span class="text-xs text-gray-400">{message.timestamp}</span>
+            <span class="text-xs text-neutral-400">{message.timestamp}</span>
           </div>
         {/each}
       {/if}
@@ -671,7 +671,7 @@
   </div>
   
   <!-- Legend -->
-  <div class="bg-gray-50 p-4 rounded-lg">
+  <div class="bg-neutral-50 p-4 rounded-lg">
     <h4 class="font-medium mb-2">Legend</h4>
     <div class="grid grid-cols-4 gap-4 text-sm">
       <div class="flex items-center space-x-2">

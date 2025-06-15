@@ -66,7 +66,7 @@
 
   <div class="flex space-x-4">
     <div class="flex-1">
-      <label for="message-input" class="block text-sm font-medium text-gray-700 mb-2">
+      <label for="message-input" class="block text-sm font-medium text-neutral-700 mb-2">
         Enter your message:
       </label>
       <textarea
@@ -75,7 +75,7 @@
         on:keypress={handleKeyPress}
         placeholder="Type your message here..."
         rows="3"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         disabled={loading}
       ></textarea>
     </div>
@@ -85,7 +85,7 @@
     <button
       on:click={sendMessage}
       disabled={!message.trim() || loading || !connected}
-      class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+      class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-neutral-400 disabled:cursor-not-allowed flex items-center"
     >
       {#if loading}
         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -100,16 +100,16 @@
 
     <button
       on:click={clearMessages}
-      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+      class="px-3 py-2 bg-neutral-600 text-white rounded-md hover:bg-neutral-700"
     >
       Clear Messages
     </button>
   </div>
 
-  <div class="bg-gray-50 p-4 rounded-lg">
+  <div class="bg-neutral-50 p-4 rounded-lg">
     <div class="flex justify-between items-center mb-4">
-      <h4 class="text-lg font-semibold text-gray-800">Messages ({messages.length})</h4>
-      <div class="text-sm text-gray-600">
+      <h4 class="text-lg font-semibold text-neutral-800">Messages ({messages.length})</h4>
+      <div class="text-sm text-neutral-600">
         Status: {connected ? 'Connected' : 'Disconnected'}
       </div>
     </div>
@@ -118,12 +118,12 @@
       {#each messages as msg (msg.id)}
         <div class="bg-white p-3 rounded border-l-4 border-blue-500">
           <div class="flex justify-between items-start">
-            <p class="text-gray-800 flex-1">{msg.text}</p>
-            <span class="text-xs text-gray-500 ml-4">{msg.timestamp}</span>
+            <p class="text-neutral-800 flex-1">{msg.text}</p>
+            <span class="text-xs text-neutral-500 ml-4">{msg.timestamp}</span>
           </div>
         </div>
       {:else}
-        <div class="text-center text-gray-500 py-8">
+        <div class="text-center text-neutral-500 py-8">
           No messages yet. Send your first message above!
         </div>
       {/each}

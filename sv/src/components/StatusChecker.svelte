@@ -92,7 +92,7 @@
     <button
       on:click={checkStatus}
       disabled={loading || !connected}
-      class="px-8 py-4 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-lg font-semibold flex items-center justify-center mx-auto"
+      class="px-8 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-lg font-semibold flex items-center justify-center mx-auto"
     >
       {#if loading}
         <svg class="animate-spin -ml-1 mr-3 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -112,17 +112,17 @@
     <div class="flex justify-center">
       <button
         on:click={clearHistory}
-        class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm"
+        class="px-3 py-2 bg-neutral-600 text-white rounded-md hover:bg-neutral-700 text-sm"
       >
         Clear History
       </button>
     </div>
   </div>
 
-  <div class="bg-gray-50 p-4 rounded-lg">
+  <div class="bg-neutral-50 p-4 rounded-lg">
     <div class="flex justify-between items-center mb-4">
-      <h4 class="text-lg font-semibold text-gray-800">Status Check History ({statusHistory.length})</h4>
-      <div class="text-sm text-gray-600">
+      <h4 class="text-lg font-semibold text-neutral-800">Status Check History ({statusHistory.length})</h4>
+      <div class="text-sm text-neutral-600">
         Status: {connected ? 'Connected' : 'Disconnected'}
       </div>
     </div>
@@ -140,24 +140,24 @@
                 {entry.success ? 'SUCCESS' : 'ERROR'}
               </span>
             </div>
-            <span class="text-xs text-gray-500">{entry.timestamp}</span>
+            <span class="text-xs text-neutral-500">{entry.timestamp}</span>
           </div>
 
           {#if entry.success && entry.response}
             <div class="space-y-2">
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span class="font-medium text-gray-600">Timestamp:</span>
-                  <p class="text-gray-800">{new Date(entry.response.timestamp).toLocaleString()}</p>
+                  <span class="font-medium text-neutral-600">Timestamp:</span>
+                  <p class="text-neutral-800">{new Date(entry.response.timestamp).toLocaleString()}</p>
                 </div>
                 <div>
-                  <span class="font-medium text-gray-600">Status:</span>
-                  <p class="text-gray-800">{entry.response.status}</p>
+                  <span class="font-medium text-neutral-600">Status:</span>
+                  <p class="text-neutral-800">{entry.response.status}</p>
                 </div>
               </div>
               <div>
-                <span class="font-medium text-gray-600">Server Info:</span>
-                <p class="text-gray-800">{entry.response.server_info}</p>
+                <span class="font-medium text-neutral-600">Server Info:</span>
+                <p class="text-neutral-800">{entry.response.server_info}</p>
               </div>
             </div>
           {:else if entry.error}
@@ -167,7 +167,7 @@
           {/if}
         </div>
       {:else}
-        <div class="text-center text-gray-500 py-8">
+        <div class="text-center text-neutral-500 py-8">
           No status checks yet. Click the button above to check server status!
         </div>
       {/each}

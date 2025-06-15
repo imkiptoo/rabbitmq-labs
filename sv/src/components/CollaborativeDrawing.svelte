@@ -379,24 +379,24 @@
     <div class="flex flex-wrap items-center gap-4">
       <!-- Username Input -->
       <div class="flex items-center space-x-2">
-        <label class="text-sm font-medium text-gray-700">Username:</label>
+        <label class="text-sm font-medium text-neutral-700">Username:</label>
         <input
           type="text"
           bind:value={username}
           on:blur={updateUsername}
           on:keydown={(e) => e.key === 'Enter' && e.target.blur()}
-          class="px-3 py-1 border border-gray-300 rounded text-sm w-32"
+          class="px-3 py-1 border border-neutral-300 rounded text-sm w-32"
           placeholder="Enter your name"
         />
       </div>
       <!-- Color Picker -->
       <div class="flex items-center space-x-2">
-        <label class="text-sm font-medium text-gray-700">Color:</label>
+        <label class="text-sm font-medium text-neutral-700">Color:</label>
         <div class="flex space-x-1">
           {#each colors as color}
             <button
               class="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 {
-                userColor === color ? 'border-gray-800 scale-110' : 'border-gray-300'
+                userColor === color ? 'border-neutral-800 scale-110' : 'border-neutral-300'
               }"
               style="background-color: {color}"
               on:click={() => userColor = color}
@@ -406,13 +406,13 @@
         <input
           type="color"
           bind:value={userColor}
-          class="w-12 h-8 border border-gray-300 rounded"
+          class="w-12 h-8 border border-neutral-300 rounded"
         />
       </div>
       
       <!-- Brush Size -->
       <div class="flex items-center space-x-2">
-        <label class="text-sm font-medium text-gray-700">Size:</label>
+        <label class="text-sm font-medium text-neutral-700">Size:</label>
         <input
           type="range"
           min="1"
@@ -420,12 +420,12 @@
           bind:value={brushSize}
           class="w-24"
         />
-        <span class="text-sm text-gray-600 w-8">{brushSize}px</span>
+        <span class="text-sm text-neutral-600 w-8">{brushSize}px</span>
       </div>
       
       <!-- Clear Button -->
       <button
-        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+        class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
         on:click={handleClearCanvas}
         disabled={!connected}
       >
@@ -434,7 +434,7 @@
 
       <!-- Delete My Strokes Button -->
       <button
-        class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+        class="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
         on:click={handleDeleteMyStrokes}
         disabled={!connected}
       >
@@ -448,13 +448,13 @@
           bind:checked={showCursors}
           class="rounded"
         />
-        <span class="text-sm text-gray-700">Show Other Cursors</span>
+        <span class="text-sm text-neutral-700">Show Other Cursors</span>
       </label>
       
       <!-- Connection Status -->
       <div class="flex items-center space-x-2 ml-auto">
         <div class="w-3 h-3 rounded-full {connected ? 'bg-green-500' : 'bg-red-500'}"></div>
-        <span class="text-sm text-gray-600">
+        <span class="text-sm text-neutral-600">
           {connected ? 'Connected' : 'Disconnected'}
         </span>
       </div>
@@ -466,7 +466,7 @@
     <div class="relative">
       <canvas
         bind:this={canvas}
-        class="border border-gray-300 rounded cursor-crosshair touch-none"
+        class="border border-neutral-300 rounded cursor-crosshair touch-none"
         style="touch-action: none;"
         on:mousedown={startDrawing}
         on:mousemove={handleMouseMove}
@@ -496,7 +496,7 @@
       {/if}
     </div>
     
-    <div class="mt-4 text-sm text-gray-600">
+    <div class="mt-4 text-sm text-neutral-600">
       <strong>Your Username:</strong> {username} | 
       <strong>Your ID:</strong> {userId} | 
       <strong>Active Cursors:</strong> {cursors.size}
@@ -504,9 +504,9 @@
   </div>
   
   <!-- Instructions -->
-  <div class="bg-gray-50 p-4 rounded-lg">
+  <div class="bg-neutral-50 p-4 rounded-lg">
     <h4 class="font-medium mb-2">How it works</h4>
-    <ul class="text-sm text-gray-600 space-y-1">
+    <ul class="text-sm text-neutral-600 space-y-1">
       <li>• Set your username - it's saved in your browser for next visit</li>
       <li>• Click and drag to draw on the canvas</li>
       <li>• All drawing events are broadcast via RabbitMQ fanout exchange</li>

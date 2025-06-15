@@ -7,10 +7,10 @@
 
 <div class="space-y-6">
   <div class="bg-gradient-to-r from-red-50 via-purple-50 to-blue-50 p-6 rounded-lg">
-    <h1 class="text-3xl font-semibold text-gray-900 mb-3">🔗 Traditional vs 🚀 Message Broker</h1>
-    <p class="text-gray-700 text-lg">See why smart companies are switching from direct service calls to message brokers!</p>
+    <h1 class="text-3xl font-semibold text-neutral-900 mb-3">🔗 Traditional vs 🚀 Message Broker</h1>
+    <p class="text-neutral-700 text-lg">See why smart companies are switching from direct service calls to message brokers!</p>
     <div class="mt-4 text-center">
-      <div class="inline-flex items-center bg-yellow-100 border border-yellow-300 rounded-lg px-4 py-2">
+      <div class="inline-flex items-center bg-yellow-100 border border-yellow-300 rounded-lg px-3 py-2">
         <span class="text-yellow-800 font-medium">👇 Try the scenarios below to see the difference!</span>
       </div>
     </div>
@@ -81,29 +81,29 @@
     <div class="space-y-3">
       <div class="flex items-start space-x-3">
         <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-lg font-bold mt-0.5">💪</div>
-        <p class="text-gray-700"><strong>Stronger Systems:</strong> When one thing breaks, everything else keeps working!</p>
+        <p class="text-neutral-700"><strong>Stronger Systems:</strong> When one thing breaks, everything else keeps working!</p>
       </div>
       
       <div class="flex items-start space-x-3">
         <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-lg font-bold mt-0.5">🚀</div>
-        <p class="text-gray-700"><strong>Handle More Users:</strong> Ready for Black Friday, Super Bowl, or any traffic spike!</p>
+        <p class="text-neutral-700"><strong>Handle More Users:</strong> Ready for Black Friday, Super Bowl, or any traffic spike!</p>
       </div>
       
       <div class="flex items-start space-x-3">
         <div class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-lg font-bold mt-0.5">🔧</div>
-        <p class="text-gray-700"><strong>Easier to Fix:</strong> Update one service without breaking everything else!</p>
+        <p class="text-neutral-700"><strong>Easier to Fix:</strong> Update one service without breaking everything else!</p>
       </div>
       
       <div class="flex items-start space-x-3">
         <div class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-lg font-bold mt-0.5">⚡</div>
-        <p class="text-gray-700"><strong>Lightning Fast:</strong> Users get instant responses, even when your servers are busy!</p>
+        <p class="text-neutral-700"><strong>Lightning Fast:</strong> Users get instant responses, even when your servers are busy!</p>
       </div>
     </div>
   </div>
 
   <div class="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg">
-    <h2 class="text-xl font-semibold text-gray-900 mb-3">🏆 Why Companies Are Switching</h2>
-    <p class="text-gray-700 text-lg">
+    <h2 class="text-xl font-semibold text-neutral-900 mb-3">🏆 Why Companies Are Switching</h2>
+    <p class="text-neutral-700 text-lg">
       Netflix, Uber, Amazon - they all use message brokers because they work better! 
       The simulation above shows exactly why: when things get tough, message brokers keep your business running 
       while traditional systems fall apart. 

@@ -76,7 +76,7 @@
 
   <div class="flex space-x-4 items-end">
     <div class="flex-1">
-      <label for="number-input" class="block text-sm font-medium text-gray-700 mb-2">
+      <label for="number-input" class="block text-sm font-medium text-neutral-700 mb-2">
         Enter a number to double:
       </label>
       <input
@@ -85,7 +85,7 @@
         bind:value={number}
         on:keypress={handleKeyPress}
         placeholder="Enter any number..."
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
         disabled={loading}
       />
     </div>
@@ -93,7 +93,7 @@
     <button
       on:click={submitNumber}
       disabled={!number || loading || !connected}
-      class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+      class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-neutral-400 disabled:cursor-not-allowed flex items-center"
     >
       {#if loading}
         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -108,16 +108,16 @@
 
     <button
       on:click={clearResults}
-      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+      class="px-3 py-2 bg-neutral-600 text-white rounded-md hover:bg-neutral-700"
     >
       Clear Results
     </button>
   </div>
 
-  <div class="bg-gray-50 p-4 rounded-lg">
+  <div class="bg-neutral-50 p-4 rounded-lg">
     <div class="flex justify-between items-center mb-4">
-      <h4 class="text-lg font-semibold text-gray-800">Processing Results ({results.length})</h4>
-      <div class="text-sm text-gray-600">
+      <h4 class="text-lg font-semibold text-neutral-800">Processing Results ({results.length})</h4>
+      <div class="text-sm text-neutral-600">
         Status: {connected ? 'Connected' : 'Disconnected'}
       </div>
     </div>
@@ -130,23 +130,23 @@
               <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
                 Worker {result.worker_id}
               </span>
-              <span class="text-gray-600 text-sm">
+              <span class="text-neutral-600 text-sm">
                 Task: {result.task_id.substring(0, 8)}...
               </span>
             </div>
-            <span class="text-xs text-gray-500">{result.timestamp}</span>
+            <span class="text-xs text-neutral-500">{result.timestamp}</span>
           </div>
           <div class="text-lg">
-            <span class="text-gray-700">{result.original}</span>
-            <span class="mx-2 text-gray-400">×2 =</span>
+            <span class="text-neutral-700">{result.original}</span>
+            <span class="mx-2 text-neutral-400">×2 =</span>
             <span class="font-bold text-green-600">{result.result}</span>
           </div>
-          <div class="text-sm text-gray-500 mt-1">
+          <div class="text-sm text-neutral-500 mt-1">
             Processing time: {result.processing_time}ms
           </div>
         </div>
       {:else}
-        <div class="text-center text-gray-500 py-8">
+        <div class="text-center text-neutral-500 py-8">
           No results yet. Submit a number to see workers in action!
         </div>
       {/each}

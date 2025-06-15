@@ -303,8 +303,8 @@
 
 <div class="space-y-6">
   <div class="bg-gradient-to-r from-red-50 to-blue-50 p-6 rounded-lg">
-    <h2 class="text-2xl font-semibold text-gray-900 mb-3">Traditional vs Message Broker Architecture</h2>
-    <p class="text-gray-700 mb-4">Compare how traditional microservices and message broker patterns handle challenges:</p>
+    <h2 class="text-2xl font-semibold text-neutral-900 mb-3">Traditional vs Message Broker Architecture</h2>
+    <p class="text-neutral-700 mb-4">Compare how traditional microservices and message broker patterns handle challenges:</p>
     <div class="grid grid-cols-2 gap-4 text-sm">
       <div class="bg-red-100 p-3 rounded">
         <h4 class="font-semibold text-red-800">Traditional Challenges</h4>
@@ -328,10 +328,10 @@
   </div>
   
   <!-- Scenario Selection -->
-  <div class="bg-gray-50 p-4 rounded-lg">
+  <div class="bg-neutral-50 p-4 rounded-lg">
     <div class="text-center mb-4">
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">🎮 Try Different Scenarios</h3>
-      <p class="text-sm text-gray-600">Click a scenario below to see how each architecture handles it</p>
+      <h3 class="text-lg font-semibold text-neutral-800 mb-2">🎮 Try Different Scenarios</h3>
+      <p class="text-sm text-neutral-600">Click a scenario below to see how each architecture handles it</p>
     </div>
     
     <div class="flex items-center justify-center space-x-4 mb-4">
@@ -340,7 +340,7 @@
           class="px-6 py-3 rounded-lg border-2 transition-all font-medium {
             activeScenario === id 
               ? 'border-blue-500 bg-blue-50 text-blue-900 scale-105 shadow-lg' 
-              : 'border-gray-200 hover:border-gray-300 bg-white hover:scale-105'
+              : 'border-neutral-200 hover:border-neutral-300 bg-white hover:scale-105'
           }"
           on:click={() => changeScenario(id)}
         >
@@ -351,14 +351,14 @@
     
     <div class="flex items-center justify-center space-x-4">
       <button
-        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         on:click={togglePlayback}
       >
         {isPlaying ? '⏸️ Pause' : '▶️ Play'} Auto Demo
       </button>
       
       <button
-        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+        class="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         on:click={simulateRequest}
       >
         🚀 Send Test Request
@@ -570,11 +570,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="bg-white p-3 rounded border-l-4 border-red-400">
             <h5 class="font-medium text-red-700 mb-2">🔗 Traditional Way</h5>
-            <p class="text-sm text-gray-700">Each service calls the next service directly. Like a chain - each link depends on the next one working.</p>
+            <p class="text-sm text-neutral-700">Each service calls the next service directly. Like a chain - each link depends on the next one working.</p>
           </div>
           <div class="bg-white p-3 rounded border-l-4 border-blue-400">
             <h5 class="font-medium text-blue-700 mb-2">🚀 Message Broker Way</h5>
-            <p class="text-sm text-gray-700">Services send messages to a smart queue. The queue delivers messages when services are ready.</p>
+            <p class="text-sm text-neutral-700">Services send messages to a smart queue. The queue delivers messages when services are ready.</p>
           </div>
         </div>
       </div>
@@ -584,12 +584,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="bg-white p-3 rounded border-l-4 border-red-500">
             <h5 class="font-medium text-red-700 mb-2">😰 Traditional Problem</h5>
-            <p class="text-sm text-gray-700"><strong>Everything breaks!</strong> When payment fails, the whole order process stops. Users can't place orders at all.</p>
+            <p class="text-sm text-neutral-700"><strong>Everything breaks!</strong> When payment fails, the whole order process stops. Users can't place orders at all.</p>
             <div class="mt-2 text-xs text-red-600">❌ Order → Payment (FAILS) → Everything stops</div>
           </div>
           <div class="bg-white p-3 rounded border-l-4 border-green-500">
             <h5 class="font-medium text-green-700 mb-2">😊 Message Broker Solution</h5>
-            <p class="text-sm text-gray-700"><strong>Keep working!</strong> Orders go to the queue. When payment service comes back online, it processes all waiting orders.</p>
+            <p class="text-sm text-neutral-700"><strong>Keep working!</strong> Orders go to the queue. When payment service comes back online, it processes all waiting orders.</p>
             <div class="mt-2 text-xs text-green-600">✅ Order → Queue → Payment (when ready)</div>
           </div>
         </div>
@@ -600,12 +600,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="bg-white p-3 rounded border-l-4 border-red-500">
             <h5 class="font-medium text-red-700 mb-2">😓 Traditional Struggle</h5>
-            <p class="text-sm text-gray-700"><strong>Everything slows down!</strong> Each service waits for the previous one. Like a traffic jam - everyone gets stuck.</p>
+            <p class="text-sm text-neutral-700"><strong>Everything slows down!</strong> Each service waits for the previous one. Like a traffic jam - everyone gets stuck.</p>
             <div class="mt-2 text-xs text-red-600">🐌 Slow → Slower → Even Slower</div>
           </div>
           <div class="bg-white p-3 rounded border-l-4 border-green-500">
             <h5 class="font-medium text-green-700 mb-2">😎 Message Broker Handles It</h5>
-            <p class="text-sm text-gray-700"><strong>Smooth sailing!</strong> Messages wait in line. Each service works at its own speed without blocking others.</p>
+            <p class="text-sm text-neutral-700"><strong>Smooth sailing!</strong> Messages wait in line. Each service works at its own speed without blocking others.</p>
             <div class="mt-2 text-xs text-green-600">📦 Queue manages the traffic flow</div>
           </div>
         </div>
@@ -614,7 +614,7 @@
   </div>
 
   <!-- Legend -->
-  <div class="bg-gray-50 p-4 rounded-lg">
+  <div class="bg-neutral-50 p-4 rounded-lg">
     <h4 class="font-medium mb-3">Legend</h4>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
       <div class="flex items-center space-x-2">

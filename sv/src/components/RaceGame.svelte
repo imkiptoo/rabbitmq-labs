@@ -105,7 +105,7 @@
   {#if !gameStarted}
     <div class="text-center space-y-4">
       <div class="max-w-md mx-auto">
-        <label for="player-name" class="block text-sm font-medium text-gray-700 mb-2">
+        <label for="player-name" class="block text-sm font-medium text-neutral-700 mb-2">
           Enter your player name:
         </label>
         <input
@@ -114,13 +114,13 @@
           bind:value={playerName}
           on:keypress={handleKeyPress}
           placeholder="Your name..."
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         />
       </div>
       <button
         on:click={startGame}
         disabled={!playerName.trim() || !connected}
-        class="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-lg font-semibold"
+        class="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-lg font-semibold"
       >
         Start Game
       </button>
@@ -170,24 +170,24 @@
             >
               CLICK!
             </button>
-            <p class="text-gray-600 mt-2">Click the button to increase your score!</p>
+            <p class="text-neutral-600 mt-2">Click the button to increase your score!</p>
           </div>
         {/if}
       </div>
 
       <!-- Leaderboard -->
-      <div class="bg-gray-50 p-4 rounded-lg">
-        <h4 class="text-lg font-semibold text-gray-800 mb-4">Live Leaderboard</h4>
+      <div class="bg-neutral-50 p-4 rounded-lg">
+        <h4 class="text-lg font-semibold text-neutral-800 mb-4">Live Leaderboard</h4>
         <div class="space-y-2 max-h-96 overflow-y-auto">
           {#each sortedLeaderboard as [player, score], index (player)}
             <div class="flex items-center justify-between p-2 bg-white rounded border-l-4 {
               index === 0 ? 'border-yellow-500' : 
-              index === 1 ? 'border-gray-400' : 
-              index === 2 ? 'border-orange-500' : 'border-gray-300'
+              index === 1 ? 'border-neutral-400' : 
+              index === 2 ? 'border-orange-500' : 'border-neutral-300'
             } {player === playerName ? 'bg-purple-100' : ''}">
               <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-600">#{index + 1}</span>
-                <span class="font-medium {player === playerName ? 'text-purple-800' : 'text-gray-800'}">
+                <span class="font-bold text-neutral-600">#{index + 1}</span>
+                <span class="font-medium {player === playerName ? 'text-purple-800' : 'text-neutral-800'}">
                   {player}
                   {#if player === playerName}
                     <span class="text-xs text-purple-600">(You)</span>
@@ -195,8 +195,8 @@
                 </span>
               </div>
               <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-800">{score}</span>
-                <div class="w-20 bg-gray-200 rounded-full h-2">
+                <span class="font-bold text-neutral-800">{score}</span>
+                <div class="w-20 bg-neutral-200 rounded-full h-2">
                   <div
                     class="bg-purple-600 h-2 rounded-full transition-all duration-300"
                     style="width: {Math.min(score, 100)}%"
@@ -205,7 +205,7 @@
               </div>
             </div>
           {:else}
-            <div class="text-center text-gray-500 py-4">
+            <div class="text-center text-neutral-500 py-3">
               No players yet. Start clicking to appear on the leaderboard!
             </div>
           {/each}

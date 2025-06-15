@@ -34,7 +34,7 @@
     
     <div class="mt-4">
       <h3 class="text-md font-medium mb-3">Message Flow Visualization System</h3>
-      <svg width="100%" height="160" viewBox="0 0 900 160" class="border rounded bg-gray-50">
+      <svg width="100%" height="160" viewBox="0 0 900 160" class="border rounded bg-neutral-50">
         <defs>
           <marker id="arrowhead6" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="#374151" />
