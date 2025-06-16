@@ -11,7 +11,7 @@ const routes = {
   '/rpc': 'rpc',
   '/drawing': 'drawing',
   '/simulator': 'simulator',
-  '/comparison': 'comparison',
+  '/exchange-types': 'exchange-types',
   '/newsimulations': 'newsimulations'
 };
 

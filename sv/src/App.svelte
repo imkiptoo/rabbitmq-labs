@@ -13,7 +13,7 @@
   import RpcPage from "./pages/RpcPage.svelte";
   import DrawingPage from "./pages/DrawingPage.svelte";
   import SimulatorPage from "./pages/SimulatorPage.svelte";
-  import ComparisonPage from "./pages/ComparisonPage.svelte";
+  import ExchangeTypesPage from "./pages/ExchangeTypesPage.svelte";
   import NewSimulationsPage from "./pages/NewSimulationsPage.svelte";
 
   let ws = null;
@@ -29,7 +29,7 @@
     rpc: RpcPage,
     drawing: DrawingPage,
     simulator: SimulatorPage,
-    comparison: ComparisonPage,
+    'exchange-types': ExchangeTypesPage,
     newsimulations: NewSimulationsPage,
   };
 

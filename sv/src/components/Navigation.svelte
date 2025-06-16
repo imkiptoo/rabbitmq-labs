@@ -19,7 +19,7 @@
   
   const navItems = [
     { id: 'home', name: 'Home', href: '/', icon: 'ph:house-duotone' },
-    { id: 'comparison', name: 'Traditional vs Broker', href: '/comparison', icon: 'ph:scales-duotone' },
+    { id: 'exchange-types', name: 'Exchange Types', href: '/exchange-types', icon: 'ph:swap-duotone' },
     { id: 'logger', name: 'Message Logger', href: '/logger', icon: 'ph:mailbox-duotone' },
     { id: 'workers', name: 'Number Doubler', href: '/workers', icon: 'ph:calculator-duotone' },
     { id: 'game', name: 'Race to 100 Game', href: '/game', icon: 'ph:flag-checkered-duotone' },

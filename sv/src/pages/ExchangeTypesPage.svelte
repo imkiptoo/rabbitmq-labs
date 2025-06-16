@@ -71,12 +71,31 @@
   // Define different message broker concepts
   const directDemo = {
     name: "Direct Exchange Pattern",
-    description: "Producer → direct exchange → specific queue → consumer (point-to-point)",
+    description:
+      "Producer → direct exchange → specific queue → consumer (point-to-point)",
     nodes: [
-      { id: "producer", type: "producer", x: 100, y: 200, label: "Message Producer" },
-      { id: "exchange", type: "exchange", x: 300, y: 200, label: "Direct Exchange" },
+      {
+        id: "producer",
+        type: "producer",
+        x: 100,
+        y: 200,
+        label: "Message Producer",
+      },
+      {
+        id: "exchange",
+        type: "exchange",
+        x: 300,
+        y: 200,
+        label: "Direct Exchange",
+      },
       { id: "queue1", type: "queue", x: 500, y: 200, label: "orders.process" },
-      { id: "consumer1", type: "consumer", x: 700, y: 200, label: "Order Processor" },
+      {
+        id: "consumer1",
+        type: "consumer",
+        x: 700,
+        y: 200,
+        label: "Order Processor",
+      },
     ],
     connections: [
       { from: "producer", to: "exchange" },
@@ -86,17 +105,48 @@
   };
 
   const topicDemo = {
-    name: "Topic Exchange Pattern", 
-    description: "Producer → topic exchange → queues by pattern → consumers (publish/subscribe)",
+    name: "Topic Exchange Pattern",
+    description:
+      "Producer → topic exchange → queues by pattern → consumers (publish/subscribe)",
     nodes: [
-      { id: "producer", type: "producer", x: 100, y: 200, label: "Log Producer" },
-      { id: "exchange", type: "exchange", x: 300, y: 200, label: "Topic Exchange" },
+      {
+        id: "producer",
+        type: "producer",
+        x: 100,
+        y: 200,
+        label: "Log Producer",
+      },
+      {
+        id: "exchange",
+        type: "exchange",
+        x: 300,
+        y: 200,
+        label: "Topic Exchange",
+      },
       { id: "queue1", type: "queue", x: 500, y: 120, label: "Error Logs" },
       { id: "queue2", type: "queue", x: 500, y: 200, label: "Info Logs" },
       { id: "queue3", type: "queue", x: 500, y: 280, label: "All Logs" },
-      { id: "consumer1", type: "consumer", x: 700, y: 120, label: "Error Handler" },
-      { id: "consumer2", type: "consumer", x: 700, y: 200, label: "Info Monitor" },
-      { id: "consumer3", type: "consumer", x: 700, y: 280, label: "Archive Service" },
+      {
+        id: "consumer1",
+        type: "consumer",
+        x: 700,
+        y: 120,
+        label: "Error Handler",
+      },
+      {
+        id: "consumer2",
+        type: "consumer",
+        x: 700,
+        y: 200,
+        label: "Info Monitor",
+      },
+      {
+        id: "consumer3",
+        type: "consumer",
+        x: 700,
+        y: 280,
+        label: "Archive Service",
+      },
     ],
     connections: [
       { from: "producer", to: "exchange" },
@@ -111,14 +161,39 @@
 
   const headersDemo = {
     name: "Headers Exchange Pattern",
-    description: "Producer → headers exchange → queues by attributes → consumers (content-based routing)",
+    description:
+      "Producer → headers exchange → queues by attributes → consumers (content-based routing)",
     nodes: [
-      { id: "producer", type: "producer", x: 100, y: 200, label: "Event Producer" },
-      { id: "exchange", type: "exchange", x: 300, y: 200, label: "Headers Exchange" },
+      {
+        id: "producer",
+        type: "producer",
+        x: 100,
+        y: 200,
+        label: "Event Producer",
+      },
+      {
+        id: "exchange",
+        type: "exchange",
+        x: 300,
+        y: 200,
+        label: "Headers Exchange",
+      },
       { id: "queue1", type: "queue", x: 500, y: 150, label: "High Priority" },
       { id: "queue2", type: "queue", x: 500, y: 250, label: "Low Priority" },
-      { id: "consumer1", type: "consumer", x: 700, y: 150, label: "Urgent Handler" },
-      { id: "consumer2", type: "consumer", x: 700, y: 250, label: "Background Processor" },
+      {
+        id: "consumer1",
+        type: "consumer",
+        x: 700,
+        y: 150,
+        label: "Urgent Handler",
+      },
+      {
+        id: "consumer2",
+        type: "consumer",
+        x: 700,
+        y: 250,
+        label: "Background Processor",
+      },
     ],
     connections: [
       { from: "producer", to: "exchange" },
@@ -130,21 +205,74 @@
   };
 
   const demos = {
-    fanout: fanoutDemo,
     direct: directDemo,
     topic: topicDemo,
+    fanout: fanoutDemo,
     headers: headersDemo,
   };
 
-  let activeTab = 'fanout';
-  let currentDemo = fanoutDemo;
+  let activeTab = "direct";
+  let currentDemo = directDemo;
+
+  // Topic exchange specific state
+  let topicType = "error"; // 'error', 'info', 'all'
+  let messageLogs = [];
+  let logIdCounter = 0;
+
+  const topicTypes = {
+    error: {
+      label: "Error Logs (*.error)",
+      pattern: "*.error",
+      description: "Routes to Error Logs queue only",
+    },
+    info: {
+      label: "Info Logs (*.info)",
+      pattern: "*.info",
+      description: "Routes to Info Logs queue only",
+    },
+    all: {
+      label: "All Logs (#)",
+      pattern: "#",
+      description: "Routes to All Logs queue (wildcard)",
+    },
+    specific: {
+      label: "App Errors (app.error)",
+      pattern: "app.error",
+      description: "Routes to Error and All Logs queues",
+    },
+  };
+
+  function addLogEntry(message, type = "info", data = null) {
+    const timestamp = new Date().toLocaleTimeString();
+    logIdCounter++;
+    const logEntry = {
+      message,
+      type,
+      timestamp,
+      id: `log-${Date.now()}-${logIdCounter}`,
+      data,
+    };
+    console.log("Adding log entry:", logEntry);
+    messageLogs = [logEntry, ...messageLogs].slice(0, 50); // Keep last 50 logs
+    console.log("Total logs now:", messageLogs.length);
+  }
+
+  function clearLogs() {
+    messageLogs = [];
+    logIdCounter = 0;
+  }
 
   function switchTab(tabName) {
     activeTab = tabName;
     currentDemo = demos[tabName];
+
+    // Clear all messages and animations before switching
     clearMessages();
-    
+    clearLogs();
+
     if (svg) {
+      // Force stop all transitions and clear everything
+      svg.selectAll("*").interrupt();
       svg.selectAll("*").remove();
       initializeD3Visualization();
     }
@@ -154,6 +282,13 @@
     if (typeof window !== "undefined") {
       window.addEventListener("websocket-message", handleWebSocketMessage);
       initializeD3Visualization();
+
+      // Add initial log entry to show logs are working
+      addLogEntry(
+        `📋 Exchange Types page loaded - Ready to simulate ${activeTab} exchange`,
+        "info"
+      );
+
       return () => {
         window.removeEventListener("websocket-message", handleWebSocketMessage);
       };
@@ -392,23 +527,112 @@
       .text((d) => d.label);
   }
 
-  function simulateMessage() {
+  async function simulateMessage() {
     messageCount++;
 
+    // Create the request payload based on exchange type
+    let requestPayload;
+
+    switch (activeTab) {
+      case "direct":
+        requestPayload = {
+          exchange: "direct_exchange",
+          routingKey: "orders.process",
+          message: {
+            messageId: messageCount,
+            content: `Order ${messageCount}`,
+            timestamp: new Date().toISOString(),
+            exchangeType: "direct",
+          },
+        };
+        break;
+
+      case "topic":
+        const selectedType = topicTypes[topicType];
+        requestPayload = {
+          exchange: "topic_exchange",
+          routingKey: selectedType.pattern,
+          message: {
+            messageId: messageCount,
+            content: `Log message ${messageCount}`,
+            timestamp: new Date().toISOString(),
+            exchangeType: "topic",
+            logLevel: topicType,
+          },
+        };
+        break;
+
+      case "fanout":
+        requestPayload = {
+          exchange: "fanout_exchange",
+          message: {
+            messageId: messageCount,
+            content: `Broadcast message ${messageCount}`,
+            timestamp: new Date().toISOString(),
+            exchangeType: "fanout",
+          },
+        };
+        break;
+
+      case "headers":
+        const priority = Math.random() > 0.6 ? "high" : "low";
+        requestPayload = {
+          exchange: "headers_exchange",
+          headers: {
+            priority: priority,
+            messageType: "event",
+          },
+          message: {
+            messageId: messageCount,
+            content: `${priority} priority message ${messageCount}`,
+            timestamp: new Date().toISOString(),
+            exchangeType: "headers",
+            priority: priority,
+          },
+        };
+        break;
+
+      default:
+        return;
+    }
+
+    // Log the request being sent
+    console.log(`🚀 Sending ${activeTab} exchange request:`, requestPayload);
+    addLogEntry(`🚀 Sending request to ${activeTab} exchange`, "info");
+    addLogEntry(`📤 Request payload`, "json", requestPayload);
+
+    // Create simulated message for animation (always run animation)
     const simulatedMessage = {
       id: Date.now(),
       demo: activeTab,
-      data: {
-        messageId: messageCount,
-        content: `Message ${messageCount}`,
-        timestamp: new Date().toISOString(),
-        exchangeType: activeTab,
-      },
+      data: requestPayload.message,
       timestamp: new Date().toLocaleTimeString(),
     };
 
-    console.log(`Simulating ${activeTab} message:`, simulatedMessage);
+    // Start animation immediately
     animateMessage(simulatedMessage);
+
+    // Try to send to backend logger (optional - works with existing endpoint)
+    try {
+      const response = await fetch("http://localhost:3030/api/logger/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: `${activeTab} exchange simulation: ${JSON.stringify(requestPayload, null, 2)}`,
+        }),
+      });
+
+      if (response.ok) {
+        addLogEntry(`✅ Message sent to backend logger`, "success");
+      } else {
+        addLogEntry(`ℹ️ Backend unavailable - visualization only`, "info");
+      }
+    } catch (error) {
+      // Silently handle error - this is optional functionality
+      addLogEntry(`ℹ️ Running in demo mode - visualization only`, "info");
+    }
   }
 
   function clearMessages() {
@@ -426,11 +650,16 @@
     if (svg) {
       svg.select(".messages").selectAll("*").remove();
       svg.select(".connection-highlights").selectAll("*").remove();
+
+      // Force stop any ongoing transitions
+      svg.selectAll("*").interrupt();
     }
+
+    // Don't clear logs in clearMessages, only when explicitly requested
   }
 
   function animateMessage(message) {
-    const messageId = `msg-${Date.now()}-${Math.random()}`;
+    const messageId = `msg-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
     // Start with producer to exchange
     const firstConnection = currentDemo.connections[0];
@@ -687,9 +916,11 @@
               }
             }, 200);
           } else {
-            // Remove message at final destination
+            // Remove message at final destination and clear any remaining highlights
             setTimeout(() => {
               message.remove();
+              // Clear any remaining highlights after final animation
+              svg.select(".connection-highlights").selectAll("*").remove();
             }, 500);
           }
         }
@@ -744,6 +975,22 @@
       (conn) => conn.from === exchangeId
     );
 
+    if (activeTab === "fanout") {
+      const fanoutRoutingData = {
+        routingKey: "ignored",
+        exchange: "fanout",
+        matchedQueues: ["queue_a", "queue_b", "queue_c"],
+        routingDecision: "broadcast_to_all",
+      };
+      addLogEntry(`📨 Fanout message received (routing key ignored)`, "info");
+      addLogEntry(`🎯 Broadcasting to all bound queues`, "success");
+      addLogEntry(`🔍 Routing analysis`, "json", fanoutRoutingData);
+      addLogEntry(
+        `➡️ Routing to: All ${fanoutConnections.length} queues simultaneously`,
+        "route"
+      );
+    }
+
     // All fanout messages start simultaneously at the exact same time
     const fanoutStartTime = Date.now();
 
@@ -776,6 +1023,22 @@
       const connectionId = `direct-highlight-${Date.now()}`;
       const directMessageId = `direct-${Date.now()}`;
 
+      if (activeTab === "direct") {
+        const directRoutingData = {
+          routingKey: "orders.process",
+          exchange: "direct",
+          matchedQueues: ["orders.process"],
+          routingDecision: "exact_key_match",
+        };
+        addLogEntry(
+          `📨 Direct message with routing key "orders.process" received`,
+          "info"
+        );
+        addLogEntry(`🎯 Exact match found for queue binding`, "success");
+        addLogEntry(`🔍 Routing analysis`, "json", directRoutingData);
+        addLogEntry(`➡️ Routing to: orders.process queue`, "route");
+      }
+
       // Create highlight
       highlightConnection(connection, connectionId);
 
@@ -795,10 +1058,88 @@
       (conn) => conn.from === exchangeId
     );
 
-    // Simulate routing key matching - for demo, route to multiple queues
-    const matchingConnections = Math.random() > 0.5 ? 
-      topicConnections : // Route to all queues for *.* pattern
-      topicConnections.slice(0, 1); // Route to specific queue for specific pattern
+    const selectedType = topicTypes[topicType];
+    let matchingConnections = [];
+    let routingDecision = "";
+
+    // Determine routing based on topic type
+    switch (topicType) {
+      case "error":
+        // Routes only to Error Logs queue (index 0)
+        matchingConnections = [topicConnections[0]];
+        routingDecision = `Routing key "${selectedType.pattern}" matches Error Logs queue binding`;
+        const errorRoutingData = {
+          routingKey: selectedType.pattern,
+          exchange: "topic",
+          matchedQueues: ["error_logs"],
+          routingDecision: "exact_pattern_match",
+        };
+        addLogEntry(
+          `📨 Message with routing key "${selectedType.pattern}" received`,
+          "info"
+        );
+        addLogEntry(`🎯 ${routingDecision}`, "success");
+        addLogEntry(`🔍 Routing analysis`, "json", errorRoutingData);
+        addLogEntry(`➡️ Routing to: Error Logs queue`, "route");
+        break;
+      case "info":
+        // Routes only to Info Logs queue (index 1)
+        matchingConnections = [topicConnections[1]];
+        routingDecision = `Routing key "${selectedType.pattern}" matches Info Logs queue binding`;
+        const infoRoutingData = {
+          routingKey: selectedType.pattern,
+          exchange: "topic",
+          matchedQueues: ["info_logs"],
+          routingDecision: "exact_pattern_match",
+        };
+        addLogEntry(
+          `📨 Message with routing key "${selectedType.pattern}" received`,
+          "info"
+        );
+        addLogEntry(`🎯 ${routingDecision}`, "success");
+        addLogEntry(`🔍 Routing analysis`, "json", infoRoutingData);
+        addLogEntry(`➡️ Routing to: Info Logs queue`, "route");
+        break;
+      case "all":
+        // Routes to ALL queues (# matches everything)
+        matchingConnections = topicConnections; // All connections
+        routingDecision = `Routing key "${selectedType.pattern}" (wildcard) matches all queue bindings`;
+        const allRoutingData = {
+          routingKey: selectedType.pattern,
+          exchange: "topic",
+          matchedQueues: ["error_logs", "info_logs", "all_logs"],
+          routingDecision: "wildcard_matches_all",
+        };
+        addLogEntry(
+          `📨 Message with routing key "${selectedType.pattern}" received`,
+          "info"
+        );
+        addLogEntry(`🎯 ${routingDecision}`, "success");
+        addLogEntry(`🔍 Routing analysis`, "json", allRoutingData);
+        addLogEntry(`➡️ Routing to: All queues (Error + Info + All Logs)`, "route");
+        break;
+      case "specific":
+        // Routes to both Error Logs and All Logs queues
+        matchingConnections = [topicConnections[0], topicConnections[2]]; // Error and All
+        routingDecision = `Routing key "${selectedType.pattern}" matches multiple queue bindings`;
+        const specificRoutingData = {
+          routingKey: selectedType.pattern,
+          exchange: "topic",
+          matchedQueues: ["error_logs", "all_logs"],
+          routingDecision: "multi_queue_match",
+        };
+        addLogEntry(
+          `📨 Message with routing key "${selectedType.pattern}" received`,
+          "info"
+        );
+        addLogEntry(`🎯 ${routingDecision}`, "success");
+        addLogEntry(`🔍 Routing analysis`, "json", specificRoutingData);
+        addLogEntry(
+          `➡️ Routing to: Error Logs queue + All Logs queue`,
+          "route"
+        );
+        break;
+    }
 
     const topicStartTime = Date.now();
 
@@ -826,9 +1167,33 @@
     );
 
     // Simulate header matching - randomly route to one queue based on priority
-    const selectedConnection = Math.random() > 0.6 ? 
-      headerConnections[0] : // High priority queue
-      headerConnections[1] || headerConnections[0]; // Low priority queue
+    const isHighPriority = Math.random() > 0.6;
+    const selectedConnection = isHighPriority
+      ? headerConnections[0] // High priority queue
+      : headerConnections[1] || headerConnections[0]; // Low priority queue
+
+    if (activeTab === "headers") {
+      const priority = isHighPriority ? "high" : "low";
+      const queueName = isHighPriority ? "High Priority" : "Low Priority";
+      const headersRoutingData = {
+        headers: { priority: priority, messageType: "event" },
+        exchange: "headers",
+        matchedQueues: [
+          priority === "high" ? "high_priority_queue" : "low_priority_queue",
+        ],
+        routingDecision: "header_attribute_match",
+      };
+      addLogEntry(
+        `📨 Headers message with priority="${priority}" received`,
+        "info"
+      );
+      addLogEntry(
+        `🎯 Header matching: priority="${priority}" matches queue binding`,
+        "success"
+      );
+      addLogEntry(`🔍 Routing analysis`, "json", headersRoutingData);
+      addLogEntry(`➡️ Routing to: ${queueName} queue`, "route");
+    }
 
     if (selectedConnection) {
       const connectionId = `headers-highlight-${Date.now()}`;
@@ -862,7 +1227,8 @@
 
     // Create unique ID for this highlight
     const highlightId =
-      connectionId || `highlight-${Date.now()}-${Math.random()}`;
+      connectionId ||
+      `highlight-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
     const pathData = getConnectionPath(connection.from, connection.to);
 
@@ -996,11 +1362,22 @@
       });
 
     // Remove all highlight layers after animation duration
+    // Use longer timeout for queue-to-consumer highlights and exchange highlights in multi-segment flows
+    const isQueueToConsumer =
+      connectionId && connectionId.includes("queue-consumer");
+    const isExchangeHighlight =
+      connectionId && !connectionId.includes("queue-consumer");
+    const timeoutDuration = isQueueToConsumer
+      ? animationSpeed + 600
+      : isExchangeHighlight && activeTab !== "fanout"
+        ? animationSpeed + 400
+        : animationSpeed;
+
     setTimeout(() => {
       highlightGroup.select(`#${highlightId}-outer`).remove();
       highlightGroup.select(`#${highlightId}-middle`).remove();
       highlightGroup.select(`#${highlightId}-core`).remove();
-    }, animationSpeed);
+    }, timeoutDuration);
   }
 
   function getNodeColor(type) {
@@ -1143,79 +1520,145 @@
   }
 </script>
 
-<div class="">
+<div class="h-screen flex flex-col space-y-3">
   <!-- Tab Navigation -->
-  <div class="bg-white border rounded-lg mb-4">
+  <div class="bg-white border rounded-lg flex-shrink-0 overflow-hidden">
     <div class="border-b">
       <nav class="flex space-x-0" aria-label="Tabs">
         <button
-          class="relative px-6 py-3 text-sm font-medium transition-colors duration-200 border-b-2 {activeTab === 'fanout' ? 'text-blue-600 border-blue-600 bg-blue-50' : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
-          on:click={() => switchTab('fanout')}
-        >
-          Fanout Exchange
-          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600 transition-all duration-200 {activeTab === 'fanout' ? 'opacity-100' : 'opacity-0'}"></span>
-        </button>
-        <button
-          class="relative px-6 py-3 text-sm font-medium transition-colors duration-200 border-b-2 {activeTab === 'direct' ? 'text-green-600 border-green-600 bg-green-50' : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
-          on:click={() => switchTab('direct')}
+          class="relative px-3 py-2 font-medium transition-colors duration-200 border-b-2 {activeTab ===
+          'direct'
+            ? 'text-green-600 border-green-600 bg-green-50'
+            : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
+          on:click={() => switchTab("direct")}
         >
           Direct Exchange
-          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-green-600 transition-all duration-200 {activeTab === 'direct' ? 'opacity-100' : 'opacity-0'}"></span>
+          <span
+            class="absolute inset-x-0 bottom-0 h-0.5 bg-green-600 transition-all duration-200 {activeTab ===
+            'direct'
+              ? 'opacity-100'
+              : 'opacity-0'}"
+          ></span>
         </button>
         <button
-          class="relative px-6 py-3 text-sm font-medium transition-colors duration-200 border-b-2 {activeTab === 'topic' ? 'text-purple-600 border-purple-600 bg-purple-50' : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
-          on:click={() => switchTab('topic')}
+          class="relative px-3 py-1 font-medium transition-colors duration-200 border-b-2 {activeTab ===
+          'topic'
+            ? 'text-purple-600 border-purple-600 bg-purple-50'
+            : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
+          on:click={() => switchTab("topic")}
         >
           Topic Exchange
-          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 transition-all duration-200 {activeTab === 'topic' ? 'opacity-100' : 'opacity-0'}"></span>
+          <span
+            class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 transition-all duration-200 {activeTab ===
+            'topic'
+              ? 'opacity-100'
+              : 'opacity-0'}"
+          ></span>
         </button>
         <button
-          class="relative px-6 py-3 text-sm font-medium transition-colors duration-200 border-b-2 {activeTab === 'headers' ? 'text-orange-600 border-orange-600 bg-orange-50' : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
-          on:click={() => switchTab('headers')}
+          class="relative px-3 py-1 font-medium transition-colors duration-200 border-b-2 {activeTab ===
+          'fanout'
+            ? 'text-blue-600 border-blue-600 bg-blue-50'
+            : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
+          on:click={() => switchTab("fanout")}
+        >
+          Fanout Exchange
+          <span
+            class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600 transition-all duration-200 {activeTab ===
+            'fanout'
+              ? 'opacity-100'
+              : 'opacity-0'}"
+          ></span>
+        </button>
+        <button
+          class="relative px-3 py-1 font-medium transition-colors duration-200 border-b-2 {activeTab ===
+          'headers'
+            ? 'text-orange-600 border-orange-600 bg-orange-50'
+            : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
+          on:click={() => switchTab("headers")}
         >
           Headers Exchange
-          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-orange-600 transition-all duration-200 {activeTab === 'headers' ? 'opacity-100' : 'opacity-0'}"></span>
+          <span
+            class="absolute inset-x-0 bottom-0 h-0.5 bg-orange-600 transition-all duration-200 {activeTab ===
+            'headers'
+              ? 'opacity-100'
+              : 'opacity-0'}"
+          ></span>
         </button>
       </nav>
     </div>
-    <div class="p-4">
-      <div class="text-sm text-gray-600">
-        {#if activeTab === 'fanout'}
-          <p><strong>Fanout Exchange:</strong> Broadcasts messages to all bound queues. Ignores routing keys. Perfect for publish/subscribe patterns where all consumers need the same message.</p>
-        {:else if activeTab === 'direct'}
-          <p><strong>Direct Exchange:</strong> Routes messages to queues based on exact routing key match. Used for point-to-point messaging and task distribution.</p>
-        {:else if activeTab === 'topic'}
-          <p><strong>Topic Exchange:</strong> Routes messages using wildcard patterns in routing keys. Supports complex pub/sub scenarios with selective message delivery.</p>
-        {:else if activeTab === 'headers'}
-          <p><strong>Headers Exchange:</strong> Routes messages based on header attributes instead of routing keys. Provides flexible, attribute-based message routing.</p>
+    <div class="px-3 py-2">
+      <div class="text-gray-600 flex flex-col space-y-1">
+        {#if activeTab === "direct"}
+          <p>
+            <strong>Direct Exchange:</strong> Routes messages to queues based on
+            exact routing key match. Used for point-to-point messaging and task distribution.
+          </p>
+        {:else if activeTab === "topic"}
+          <p>
+            <strong>Topic Exchange:</strong> Routes messages using wildcard patterns
+            in routing keys. Supports complex pub/sub scenarios with selective message
+            delivery.
+          </p>
+        {:else if activeTab === "fanout"}
+          <p>
+            <strong>Fanout Exchange:</strong> Broadcasts messages to all bound queues.
+            Ignores routing keys. Perfect for publish/subscribe patterns where all
+            consumers need the same message.
+          </p>
+        {:else if activeTab === "headers"}
+          <p>
+            <strong>Headers Exchange:</strong> Routes messages based on header attributes
+            instead of routing keys. Provides flexible, attribute-based message routing.
+          </p>
         {/if}
+        <div class="text-neutral-600">{currentDemo.description}</div>
       </div>
     </div>
   </div>
 
   <!-- Visualization -->
-  <div class="bg-white border rounded-lg">
-    <div class="border-b w-full p-3">
-      <h3 class="text-lg font-semibold">{currentDemo.name}</h3>
-      <p class="text-neutral-600">{currentDemo.description}</p>
-    </div>
-    <div class="flex items-center justify-between border-b p-3">
+  <div class="bg-white border rounded-lg flex-1 flex flex-col">
+    <div class="flex items-center justify-between border-b p-3 flex-shrink-0">
       <div class="flex items-center space-x-3">
         <button
-          class="px-3 py-1.5 bg-green-700 text-white rounded-md hover:bg-green-600 transition-colors"
+          class="px-3 py-1 bg-green-700 text-white rounded-md hover:bg-green-600 transition-colors"
           on:click={simulateMessage}
         >
           Simulate Message
         </button>
 
         <button
-          class="px-3 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+          class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
           on:click={clearMessages}
         >
           Clear
         </button>
 
-        <div class="text-sm text-neutral-600">
+        {#if activeTab === "topic"}
+          <div class="flex items-center space-x-2 border-l pl-3">
+            <label class="font-medium text-neutral-700"
+              >Routing Key:</label
+            >
+            <select
+              bind:value={topicType}
+              class="px-2 py-1 border border-neutral-300 rounded bg-white"
+            >
+              {#each Object.entries(topicTypes) as [key, type]}
+                <option value={key}>{type.label}</option>
+              {/each}
+            </select>
+          </div>
+        {/if}
+
+        <button
+          class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          on:click={clearLogs}
+        >
+          Clear Logs
+        </button>
+
+        <div class="text text-neutral-600">
           Messages Sent: {messageCount} | Connection: {connected
             ? "Connected"
             : "Disconnected"}
@@ -1223,7 +1666,7 @@
       </div>
 
       <div class="flex items-center space-x-2">
-        <label class="text-sm text-neutral-600">Speed:</label>
+        <label class="text text-neutral-600">Speed:</label>
         <input
           type="range"
           min="400"
@@ -1232,20 +1675,73 @@
           bind:value={animationSpeed}
           class="w-40"
         />
-        <span class="text-sm text-neutral-600">{animationSpeed}ms</span>
+        <span class="text text-neutral-600">{animationSpeed}ms</span>
       </div>
     </div>
 
     <div class="flex flex-col h-full">
-      <!-- Chart Area -->
-      <div class="flex-1 relative overflow-hidden border-r">
-        <svg bind:this={svgElement} class="h-full"></svg>
+      <!-- Chart Area with Logs Panel -->
+      <div class="flex-1 relative overflow-hidden">
+        <div class="flex h-full">
+          <!-- Visualization -->
+          <div class="flex-1 relative overflow-hidden border-r max-h-96">
+            <svg bind:this={svgElement} class="h-full"></svg>
+          </div>
+
+          <!-- Logs Panel (for all exchange types) -->
+          <div class="w-80 bg-neutral-50 flex flex-col h-full">
+          
+            <div class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0 max-h-96">
+              {#if messageLogs.length > 0}
+                {#each messageLogs as log (log.id)}
+                  <div
+                    class="text-xs p-2 rounded border-l-2 {log.type ===
+                    'success'
+                      ? 'border-green-400 bg-green-50'
+                      : log.type === 'route'
+                        ? 'border-blue-400 bg-blue-50'
+                        : log.type === 'error'
+                          ? 'border-red-400 bg-red-50'
+                          : log.type === 'json'
+                            ? 'border-purple-400 bg-purple-50'
+                            : 'border-neutral-400 bg-white'}"
+                  >
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1 pr-2">
+                        <div class="text-neutral-800">{log.message}</div>
+                        {#if log.data && log.type === "json"}
+                          <div
+                            class="mt-1 p-2 bg-neutral-100 rounded text-xs font-mono text-neutral-600 break-all"
+                          >
+                            {JSON.stringify(log.data, null, 2)}
+                          </div>
+                        {/if}
+                      </div>
+                      <div class="text-neutral-500 text-xs whitespace-nowrap">
+                        {log.timestamp}
+                      </div>
+                    </div>
+                  </div>
+                {/each}
+              {:else}
+                <div class="text-center text-neutral-500 py-8">
+                  No messages yet. Click "Simulate Message" to see routing
+                  decisions.
+                </div>
+              {/if}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="pt-3 pb-1 border-t overflow-y-auto items-center justify-center">
+      <div
+        class="pt-3 pb-1 border-t overflow-y-auto items-center justify-center"
+      >
         <h3 class="font-semibold px-3">Legend</h3>
         <!-- Legend -->
-        <div class="grid grid-cols-6 px-3 pt-2 pb-2 overflow-y-auto items-center justify-center opacity-25 hover:opacity-100 transition-opacity">
+        <div
+          class="grid grid-cols-6 px-3 pt-2 pb-2 overflow-y-auto items-center justify-center opacity-25 hover:opacity-100 transition-opacity"
+        >
           <!-- Producer -->
           <div class="flex items-center justify-start space-x-3">
             <svg
@@ -1440,39 +1936,23 @@
       </div>
     </div>
     <div class="p-3 border-t w-full">
-      <h3 class="font-semibold mb-3">How {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Exchange Works</h3>
-      
-      {#if activeTab === 'fanout'}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div class="bg-blue-50 p-3 rounded">
-            <h4 class="font-medium text-blue-900 mb-1">1. Producer Sends</h4>
-            <p class="text-blue-700">
-              Producer sends a single message to the fanout exchange
-            </p>
-          </div>
-          <div class="bg-purple-50 p-3 rounded">
-            <h4 class="font-medium text-purple-900 mb-1">2. Exchange Broadcasts</h4>
-            <p class="text-purple-700">
-              Fanout exchange duplicates the message to all bound queues
-            </p>
-          </div>
-          <div class="bg-green-50 p-3 rounded">
-            <h4 class="font-medium text-green-900 mb-1">3. Consumers Receive</h4>
-            <p class="text-green-700">
-              Each consumer gets a copy of the original message
-            </p>
-          </div>
-        </div>
-      {:else if activeTab === 'direct'}
+      <h3 class="font-semibold mb-3">
+        How {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Exchange Works
+      </h3>
+
+      {#if activeTab === "direct"}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div class="bg-blue-50 p-3 rounded">
             <h4 class="font-medium text-blue-900 mb-1">1. Producer Routes</h4>
             <p class="text-blue-700">
-              Producer sends message with specific routing key to direct exchange
+              Producer sends message with specific routing key to direct
+              exchange
             </p>
           </div>
           <div class="bg-purple-50 p-3 rounded">
-            <h4 class="font-medium text-purple-900 mb-1">2. Exchange Matches</h4>
+            <h4 class="font-medium text-purple-900 mb-1">
+              2. Exchange Matches
+            </h4>
             <p class="text-purple-700">
               Direct exchange routes to queue with matching binding key
             </p>
@@ -1484,28 +1964,58 @@
             </p>
           </div>
         </div>
-      {:else if activeTab === 'topic'}
+      {:else if activeTab === "topic"}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div class="bg-blue-50 p-3 rounded">
             <h4 class="font-medium text-blue-900 mb-1">1. Pattern Matching</h4>
             <p class="text-blue-700">
-              Producer sends message with routing key pattern (e.g., "logs.error")
+              Producer sends message with routing key pattern (e.g.,
+              "logs.error")
             </p>
           </div>
           <div class="bg-purple-50 p-3 rounded">
-            <h4 class="font-medium text-purple-900 mb-1">2. Wildcard Routing</h4>
+            <h4 class="font-medium text-purple-900 mb-1">
+              2. Wildcard Routing
+            </h4>
             <p class="text-purple-700">
               Topic exchange matches patterns (* for one word, # for multiple)
             </p>
           </div>
           <div class="bg-green-50 p-3 rounded">
-            <h4 class="font-medium text-green-900 mb-1">3. Selective Delivery</h4>
+            <h4 class="font-medium text-green-900 mb-1">
+              3. Selective Delivery
+            </h4>
             <p class="text-green-700">
               Only consumers with matching patterns receive the message
             </p>
           </div>
         </div>
-      {:else if activeTab === 'headers'}
+      {:else if activeTab === "fanout"}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div class="bg-blue-50 p-3 rounded">
+            <h4 class="font-medium text-blue-900 mb-1">1. Producer Sends</h4>
+            <p class="text-blue-700">
+              Producer sends a single message to the fanout exchange
+            </p>
+          </div>
+          <div class="bg-purple-50 p-3 rounded">
+            <h4 class="font-medium text-purple-900 mb-1">
+              2. Exchange Broadcasts
+            </h4>
+            <p class="text-purple-700">
+              Fanout exchange duplicates the message to all bound queues
+            </p>
+          </div>
+          <div class="bg-green-50 p-3 rounded">
+            <h4 class="font-medium text-green-900 mb-1">
+              3. Consumers Receive
+            </h4>
+            <p class="text-green-700">
+              Each consumer gets a copy of the original message
+            </p>
+          </div>
+        </div>
+      {:else if activeTab === "headers"}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div class="bg-blue-50 p-3 rounded">
             <h4 class="font-medium text-blue-900 mb-1">1. Header Attributes</h4>
@@ -1514,13 +2024,18 @@
             </p>
           </div>
           <div class="bg-purple-50 p-3 rounded">
-            <h4 class="font-medium text-purple-900 mb-1">2. Attribute Matching</h4>
+            <h4 class="font-medium text-purple-900 mb-1">
+              2. Attribute Matching
+            </h4>
             <p class="text-purple-700">
-              Headers exchange evaluates message attributes against queue bindings
+              Headers exchange evaluates message attributes against queue
+              bindings
             </p>
           </div>
           <div class="bg-green-50 p-3 rounded">
-            <h4 class="font-medium text-green-900 mb-1">3. Conditional Routing</h4>
+            <h4 class="font-medium text-green-900 mb-1">
+              3. Conditional Routing
+            </h4>
             <p class="text-green-700">
               Messages route to queues based on header criteria matching
             </p>
