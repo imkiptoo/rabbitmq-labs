@@ -3,6 +3,7 @@ use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex};
 use warp::{Filter, ws::WebSocket};
 use serde::{Deserialize, Serialize};
+use tracing::{info, error, warn, debug};
 
 mod handlers;
 mod rabbitmq;
@@ -29,9 +30,17 @@ pub struct AppState {
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
+    info!("Starting RabbitMQ Demo Server");
 
+    info!("Initializing RabbitMQ connection");
     let rabbit = Arc::new(RabbitMQConnection::new().await.expect("Failed to connect to RabbitMQ"));
+    info!("RabbitMQ connection established successfully");
+
+    info!("Initializing Redis connection");
     let redis = Arc::new(RedisStore::new().await.expect("Failed to connect to Redis"));
+    info!("Redis connection established successfully");
+
+    info!("Setting up broadcast channel and game state");
     let (broadcast_tx, _) = broadcast::channel(100);
     let game_scores = Arc::new(Mutex::new(HashMap::new()));
 
@@ -43,7 +52,9 @@ async fn main() {
     };
 
     let state = Arc::new(state);
+    info!("Application state initialized");
 
+    info!("Configuring CORS policy");
     let cors = warp::cors()
         .allow_any_origin()
         .allow_headers(vec!["content-type"])
@@ -166,6 +177,7 @@ async fn main() {
             ws.on_upgrade(move |socket| handle_websocket(socket, state))
         });
 
+    info!("Setting up API routes");
     let routes = logger_route
         .or(workers_route)
         .or(game_click_route)
@@ -183,7 +195,8 @@ async fn main() {
         .or(websocket_route)
         .with(cors);
 
-    println!("Server starting on http://localhost:3030");
+    info!("All routes configured successfully");
+    info!("Server starting on http://localhost:3030");
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
 
@@ -195,29 +208,45 @@ async fn handle_websocket(ws: WebSocket, state: Arc<AppState>) {
     use futures_util::{SinkExt, StreamExt};
     use warp::ws::Message;
 
+    info!("New WebSocket connection established");
     let (mut ws_tx, mut ws_rx) = ws.split();
     let mut broadcast_rx = state.broadcast_tx.subscribe();
 
     let broadcast_task = tokio::spawn(async move {
+        debug!("Starting WebSocket broadcast task");
         while let Ok(msg) = broadcast_rx.recv().await {
+            debug!("Broadcasting message to WebSocket client: {}", msg.demo_type);
             if let Ok(json) = serde_json::to_string(&msg) {
                 if ws_tx.send(Message::text(json)).await.is_err() {
+                    warn!("Failed to send WebSocket message, client disconnected");
                     break;
                 }
+            } else {
+                error!("Failed to serialize WebSocket message");
             }
         }
+        debug!("WebSocket broadcast task ended");
     });
 
     let receive_task = tokio::spawn(async move {
+        debug!("Starting WebSocket receive task");
         while let Some(result) = ws_rx.next().await {
-            if result.is_err() {
+            if let Err(e) = result {
+                warn!("WebSocket receive error: {}", e);
                 break;
             }
+            debug!("Received WebSocket message from client");
         }
+        debug!("WebSocket receive task ended");
     });
 
     tokio::select! {
-        _ = broadcast_task => {},
-        _ = receive_task => {},
+        _ = broadcast_task => {
+            info!("WebSocket broadcast task completed");
+        },
+        _ = receive_task => {
+            info!("WebSocket receive task completed");
+        },
     }
+    info!("WebSocket connection closed");
 }

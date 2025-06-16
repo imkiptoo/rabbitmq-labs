@@ -3,6 +3,7 @@ use std::sync::Arc;
 use warp::reply::Json;
 
 use crate::{AppState, WebSocketMessage};
+use tracing::{info, warn, debug, instrument};
 
 #[derive(Debug, Deserialize)]
 pub struct SimulateRequest {
@@ -38,11 +39,15 @@ pub struct ExchangeInfo {
     pub durable: bool,
 }
 
+#[instrument(skip(request, state), fields(demo_type = %request.demo_type, flow_id))]
 pub async fn simulate_message(
     request: SimulateRequest,
     state: Arc<AppState>,
 ) -> Result<Json, warp::Rejection> {
     let flow_id = uuid::Uuid::new_v4().to_string();
+    tracing::Span::current().record("flow_id", &flow_id);
+    
+    info!("Starting message flow simulation for demo type: {}", request.demo_type);
     
     let websocket_message = WebSocketMessage {
         demo_type: "simulator".to_string(),
@@ -57,18 +62,23 @@ pub async fn simulate_message(
 
     let response = match request.demo_type.as_str() {
         "logger" => {
+            debug!("Simulating logger flow");
             simulate_logger_flow(&state, &request.message_data, &flow_id).await
         }
         "workers" => {
+            debug!("Simulating workers flow");
             simulate_workers_flow(&state, &request.message_data, &flow_id).await
         }
         "game" => {
+            debug!("Simulating game flow");
             simulate_game_flow(&state, &request.message_data, &flow_id).await
         }
         "rpc" => {
+            debug!("Simulating RPC flow");
             simulate_rpc_flow(&state, &request.message_data, &flow_id).await
         }
         _ => {
+            warn!("Unknown demo type requested: {}", request.demo_type);
             return Ok(warp::reply::json(&SimulateResponse {
                 success: false,
                 message: "Unknown demo type".to_string(),
@@ -78,9 +88,12 @@ pub async fn simulate_message(
     };
 
     if let Err(_) = state.broadcast_tx.send(websocket_message) {
-        tracing::warn!("No WebSocket clients connected");
+        warn!("No WebSocket clients connected for simulation start message");
+    } else {
+        debug!("Simulation start message broadcasted to WebSocket clients");
     }
-
+    
+    info!("Message flow simulation completed for demo type: {}", request.demo_type);
     Ok(warp::reply::json(&response))
 }
 

@@ -2,6 +2,7 @@ use std::sync::Arc;
 use warp::{Reply, Rejection};
 use serde::{Deserialize, Serialize};
 use crate::{AppState, WebSocketMessage};
+use tracing::{info, error, warn, debug, instrument};
 
 #[derive(Deserialize)]
 pub struct StatusRequest {}
@@ -14,16 +15,23 @@ pub struct StatusResponse {
     pub server_info: String,
 }
 
+#[instrument(skip(state))]
 pub async fn check_status(
     state: Arc<AppState>,
 ) -> Result<impl Reply, Rejection> {
+    info!("Received RPC status check request");
+    
+    let timestamp = chrono::Utc::now().to_rfc3339();
     let request_data = serde_json::json!({
         "type": "status_check",
-        "timestamp": chrono::Utc::now().to_rfc3339()
+        "timestamp": timestamp
     });
-
+    
+    debug!("Making RPC call for status check");
     match state.rabbit.rpc_call(request_data.clone()).await {
         Ok(response) => {
+            info!("RPC status check completed successfully");
+            
             let ws_msg = WebSocketMessage {
                 demo_type: "rpc".to_string(),
                 data: serde_json::json!({
@@ -33,7 +41,11 @@ pub async fn check_status(
                 }),
             };
 
-            let _ = state.broadcast_tx.send(ws_msg);
+            if let Err(_) = state.broadcast_tx.send(ws_msg) {
+                warn!("No WebSocket clients for RPC status response");
+            } else {
+                debug!("RPC status response broadcasted to WebSocket clients");
+            }
 
             let status_messages = [
                 "All systems operational",
@@ -44,6 +56,7 @@ pub async fn check_status(
             ];
 
             let random_status = status_messages[rand::random::<usize>() % status_messages.len()];
+            info!("Returning status: {}", random_status);
 
             Ok(warp::reply::json(&StatusResponse {
                 success: true,
@@ -53,6 +66,8 @@ pub async fn check_status(
             }))
         }
         Err(e) => {
+            error!("RPC status check failed: {}", e);
+            
             let error_response = StatusResponse {
                 success: false,
                 timestamp: chrono::Utc::now().to_rfc3339(),
@@ -68,7 +83,11 @@ pub async fn check_status(
                 }),
             };
 
-            let _ = state.broadcast_tx.send(ws_msg);
+            if let Err(_) = state.broadcast_tx.send(ws_msg) {
+                warn!("No WebSocket clients for RPC error notification");
+            } else {
+                debug!("RPC error notification broadcasted to WebSocket clients");
+            }
 
             Ok(warp::reply::json(&error_response))
         }
