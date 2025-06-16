@@ -3,6 +3,8 @@
   import { currentRoute, initRouter, navigateTo } from "./router.js";
   import Navigation from "./components/Navigation.svelte";
 
+  import Icon from "@iconify/svelte";
+
   // Import pages
   import HomePage from "./pages/HomePage.svelte";
   import LoggerPage from "./pages/LoggerPage.svelte";
@@ -82,7 +84,7 @@
 
 <div class="h-screen w-full flex flex-col">
   <header
-    class="flex h-11 items-center justify-between bg-black text-white shadow-md flex-shrink-0"
+    class="flex h-11 items-center justify-between bg-black text-white shadow-sm z-20 flex-shrink-0 pr-3"
   >
     <div class="flex items-center space-x-3">
       <!-- Mobile menu button -->
@@ -109,9 +111,9 @@
     </div>
 
     <!-- Connection Status in Header -->
-    <div class="flex items-center space-x-3 px-3">
+    <div class="flex items-center space-x-2 px-2 {connected ? 'bg-green-600' : 'bg-red-500'} rounded-md py-0.5">
       <div
-        class="w-3 h-3 rounded-full {connected ? 'bg-green-500' : 'bg-red-500'}"
+        class="w-3 h-3 rounded-full {connected ? 'bg-green-300' : 'bg-red-500'}"
       ></div>
       <span class="text-sm text-white hidden sm:block">
         {connected ? "Connected" : "Disconnected"}
@@ -186,6 +188,8 @@
   >
     <div class="flex space-x-3 text-sm">
       <div class="">Built with ❤️ using <a href="https://svelte.dev" target="_blank" class="text-white hover:underline">Svelte</a></div>
+      <div class="text-neutral-500">|</div>
+      <div class="">Available on GitHub: <a href="https://github.com/imkiptoo/rabbitmq-labs/" target="_blank" class="text-white hover:underline">github.com/imkiptoo/rabbitmq-labs</a></div>
     </div>
     <div class="flex space-x-2 items-center justify-center text-sm">
       <div>
@@ -193,14 +197,10 @@
       </div>
       {#if  connected}
       <div>Connected</div>
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" {...$$props} class="text-green-500">
-        <path fill="currentColor" d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12M8 3c.374 0 .875.356 1.313 1.318q.141.313.26.682H6.427a6 6 0 0 1 .26-.682C7.125 3.356 7.627 3 8 3m-2.223.904q-.227.5-.393 1.096H4a5 5 0 0 1 2.038-1.6a6 6 0 0 0-.261.504M5.163 6A12 12 0 0 0 5 8c0 .699.057 1.373.163 2H3.416A5 5 0 0 1 3 8c0-.711.148-1.388.416-2zm.221 5q.166.596.393 1.096q.119.262.26.504A5 5 0 0 1 4 11zm1.043 0h3.146a6 6 0 0 1-.26.682C8.875 12.644 8.373 13 8 13c-.374 0-.875-.356-1.313-1.318a6 6 0 0 1-.26-.682m3.394-1H6.18A11 11 0 0 1 6 8c0-.714.064-1.39.179-2H9.82c.115.61.179 1.286.179 2s-.064 1.39-.179 2m.795 1H12a5 5 0 0 1-2.038 1.6q.143-.242.26-.504q.229-.5.394-1.096m1.968-1h-1.747A12 12 0 0 0 11 8c0-.699-.057-1.372-.163-2h1.747c.268.612.416 1.289.416 2s-.148 1.388-.416 2M9.962 3.4A5 5 0 0 1 12 5h-1.384a7.5 7.5 0 0 0-.393-1.096a6 6 0 0 0-.26-.504" />
-      </svg>
+      <Icon icon="fluent:plug-connected-checkmark-20-filled" width="20" height="20" class="text-green-500"/>
       {:else}
       <div>Not Connected</div>
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" {...$$props} class="text-white">
-        <path fill="currentColor" d="M2 8a6 6 0 0 0 4.509 5.813A5.5 5.5 0 0 1 6 11.5a5.5 5.5 0 0 1 .207-1.5h-.028A11 11 0 0 1 6 8c0-.714.064-1.39.179-2H9.82q.024.122.043.247a5.5 5.5 0 0 1 .98-.208L10.837 6h1.747l.05.117a5.5 5.5 0 0 1 1.18.392A6 6 0 0 0 2 8m6-5c.374 0 .875.356 1.313 1.318q.141.313.26.682H6.427a6 6 0 0 1 .26-.682C7.125 3.356 7.627 3 8 3m-2.223.904q-.227.5-.393 1.096H4a5 5 0 0 1 2.038-1.6a6 6 0 0 0-.261.504M5.163 6A12 12 0 0 0 5 8c0 .699.057 1.373.163 2H3.416A5 5 0 0 1 3 8c0-.711.148-1.388.416-2zm.221 5q.166.596.393 1.096q.119.262.26.504A5 5 0 0 1 4 11zm4.578-7.6A5 5 0 0 1 12 5h-1.384a7.5 7.5 0 0 0-.393-1.096a6 6 0 0 0-.26-.504M16 11.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0M11.5 9a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5m0 5.125a.625.625 0 1 0 0-1.25a.625.625 0 0 0 0 1.25" />
-      </svg>
+      <Icon icon="fluent:plug-disconnected-20-filled" width="20" height="20" class="text-white"/>
       {/if}
     </div>
   </footer>
