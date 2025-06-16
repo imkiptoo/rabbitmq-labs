@@ -580,67 +580,54 @@
             {@const messageColor = isOriginal ? "#FF4444" : "#10B981"}
             {@const glowColor = isOriginal ? "rgba(255, 68, 68, 0.4)" : "rgba(16, 185, 129, 0.4)"}
             <g>
-              <!-- Message packet with glow effect -->
-              <!-- Use different colors for original vs fanout messages -->
-              <circle
-                cx={position.x}
-                cy={position.y}
-                r="2"
-                fill="url(#{isOriginal ? 'messageGradient' : 'fanoutMessageGradient'})"
-                stroke={messageColor}
-                stroke-width="1"
-                class="message-packet"
-              >
-                <animate
-                  attributeName="r"
-                  values="4;6;4"
-                  dur="0.6s"
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="stroke"
-                  values="{messageColor};{isOriginal ? '#FF6B35' : '#34D399'};{isOriginal ? '#FFA500' : '#6EE7B7'};{isOriginal ? '#FF6B35' : '#34D399'};{messageColor}"
-                  dur="1.5s"
-                  repeatCount="indefinite"
-                />
-              </circle>
-              
               <!-- Glow effect -->
               <circle
                 cx={position.x}
                 cy={position.y}
-                r="4"
+                r="12"
                 fill={glowColor}
                 class="message-glow"
               >
                 <animate
                   attributeName="opacity"
-                  values="0.2;0.8;0.2"
-                  dur="0.8s"
+                  values="0.2;0.6;0.2"
+                  dur="1s"
                   repeatCount="indefinite"
                 />
                 <animate
                   attributeName="r"
-                  values="7;9;7"
-                  dur="1.2s"
+                  values="10;14;10"
+                  dur="1.5s"
                   repeatCount="indefinite"
                 />
               </circle>
               
-              <!-- Data label -->
-              <!--<text
-                x={position.x}
-                y={position.y - 18}
-                text-anchor="middle"
-                fill="#374151"
-                font-size="12"
-                font-weight="bold"
-                class="message-label"
-              >
-                {typeof message.data === 'object' ? 
-                  Object.keys(message.data)[0] : 
-                  String(message.data).substring(0, 8)}
-              </text>-->
+              <!-- Message icon -->
+              <g transform="translate({position.x - 8}, {position.y - 8})">
+                <rect
+                  width="16"
+                  height="12"
+                  rx="2"
+                  ry="2"
+                  fill={messageColor}
+                  stroke="white"
+                  stroke-width="1"
+                  class="message-icon"
+                >
+                  <animate
+                    attributeName="fill"
+                    values="{messageColor};{isOriginal ? '#FF6B35' : '#34D399'};{isOriginal ? '#FFA500' : '#6EE7B7'};{isOriginal ? '#FF6B35' : '#34D399'};{messageColor}"
+                    dur="2s"
+                    repeatCount="indefinite"
+                  />
+                </rect>
+                <!-- Message lines -->
+                <line x1="3" y1="4" x2="13" y2="4" stroke="white" stroke-width="1" opacity="0.8"/>
+                <line x1="3" y1="6" x2="10" y2="6" stroke="white" stroke-width="1" opacity="0.6"/>
+                <line x1="3" y1="8" x2="12" y2="8" stroke="white" stroke-width="1" opacity="0.8"/>
+                <!-- Envelope fold -->
+                <path d="M1 2 L8 7 L15 2" stroke="white" stroke-width="1" fill="none" opacity="0.7"/>
+              </g>
             </g>
           {/if}
         {/each}
@@ -780,14 +767,13 @@
 </div>
 
 <style>
-  .message-packet {
-    filter: drop-shadow(0 0 5px rgba(255, 68, 68, 1)) 
-            drop-shadow(0 0 10px rgba(255, 107, 53, 0.8)) 
-            drop-shadow(0 0 15px rgba(255, 165, 0, 0.6));
+  .message-icon {
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3)) 
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
   }
   
   .message-glow {
-    filter: blur(1px);
+    filter: blur(2px);
   }
   
   .message-label {

@@ -153,6 +153,53 @@
       .attr("points", "0 0, 5 3.5, 0 7")
       .attr("fill", "#FF4444");
 
+    defs
+      .append("marker")
+      .attr("id", "arrowhead-active-green")
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 7)
+      .attr("refX", 5)
+      .attr("refY", 3.5)
+      .attr("orient", "auto")
+      .append("polygon")
+      .attr("points", "0 0, 5 3.5, 0 7")
+      .attr("fill", "#10B981");
+
+    // Legend gradients
+    const legendMessageGradient = defs
+      .append("radialGradient")
+      .attr("id", "legendMessageGradient")
+      .attr("cx", "50%")
+      .attr("cy", "50%")
+      .attr("r", "50%");
+    legendMessageGradient
+      .append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#FCA5A5")
+      .attr("stop-opacity", 1);
+    legendMessageGradient
+      .append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#EF4444")
+      .attr("stop-opacity", 1);
+
+    const legendFanoutGradient = defs
+      .append("radialGradient")
+      .attr("id", "legendFanoutMessageGradient")
+      .attr("cx", "50%")
+      .attr("cy", "50%")
+      .attr("r", "50%");
+    legendFanoutGradient
+      .append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#A7F3D0")
+      .attr("stop-opacity", 1);
+    legendFanoutGradient
+      .append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#10B981")
+      .attr("stop-opacity", 1);
+
     // Create groups for different elements in proper z-order (back to front)
     svg.append("g").attr("class", "connections");
     svg.append("g").attr("class", "nodes");
@@ -391,20 +438,88 @@
       .attr("fill", glowColor)
       .style("filter", "blur(2px)");
 
-    // Main message
-    const messageCircle = message
-      .append("circle")
+    // Main message icon
+    const messageIcon = message
+      .append("g")
       .attr("class", "message-packet")
-      .attr("cx", fromNode.x)
-      .attr("cy", fromNode.y)
-      .attr("r", 4)
-      .attr("fill", `url(#${gradientId})`)
-      .attr("stroke", messageColor)
+      .attr("transform", `translate(${fromNode.x - 8}, ${fromNode.y - 6})`);
+
+    // Message envelope background
+    const messageRect = messageIcon
+      .append("rect")
+      .attr("width", 16)
+      .attr("height", 12)
+      .attr("rx", 2)
+      .attr("ry", 2)
+      .attr("fill", messageColor)
+      .attr("stroke", "white")
       .attr("stroke-width", 1)
       .style(
         "filter",
-        "drop-shadow(0 0 5px rgba(255, 68, 68, 1)) drop-shadow(0 0 10px rgba(255, 107, 53, 0.8))"
+        "drop-shadow(0 0 3px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.4))"
       );
+
+    // Animate color changes
+    const colorSequence =
+      isOriginal || isFanoutFromExchange
+        ? [messageColor, "#FF6B35", "#FFA500", "#FF6B35", messageColor]
+        : [messageColor, "#34D399", "#6EE7B7", "#34D399", messageColor];
+
+    function animateColors() {
+      let colorIndex = 0;
+      function nextColor() {
+        messageRect
+          .transition()
+          .duration(400)
+          .attr("fill", colorSequence[colorIndex])
+          .on("end", () => {
+            colorIndex = (colorIndex + 1) % colorSequence.length;
+            setTimeout(nextColor, 100);
+          });
+      }
+      nextColor();
+    }
+    animateColors();
+
+    // Message content lines
+    messageIcon
+      .append("line")
+      .attr("x1", 3)
+      .attr("y1", 4)
+      .attr("x2", 13)
+      .attr("y2", 4)
+      .attr("stroke", "white")
+      .attr("stroke-width", 1)
+      .attr("opacity", 0.8);
+
+    messageIcon
+      .append("line")
+      .attr("x1", 3)
+      .attr("y1", 6)
+      .attr("x2", 10)
+      .attr("y2", 6)
+      .attr("stroke", "white")
+      .attr("stroke-width", 1)
+      .attr("opacity", 0.6);
+
+    messageIcon
+      .append("line")
+      .attr("x1", 3)
+      .attr("y1", 8)
+      .attr("x2", 12)
+      .attr("y2", 8)
+      .attr("stroke", "white")
+      .attr("stroke-width", 1)
+      .attr("opacity", 0.8);
+
+    // Envelope fold line
+    messageIcon
+      .append("path")
+      .attr("d", "M1 2 L8 7 L15 2")
+      .attr("stroke", "white")
+      .attr("stroke-width", 1)
+      .attr("fill", "none")
+      .attr("opacity", 0.7);
 
     // Animate glow pulsing
     message
@@ -426,14 +541,17 @@
       });
 
     // Animate message movement along curved path
-    messageCircle
+    messageIcon
       .transition()
       .duration(animationSpeed)
       .ease(d3.easeCubicInOut)
       .tween("pathTween", function () {
         return function (t) {
           const pos = getPositionAlongCurve(fromNode, toNode, t);
-          d3.select(this).attr("cx", pos.x).attr("cy", pos.y);
+          d3.select(this).attr(
+            "transform",
+            `translate(${pos.x - 8}, ${pos.y - 6})`
+          );
 
           // Update glow position to follow
           message.select(".message-glow").attr("cx", pos.x).attr("cy", pos.y);
@@ -519,8 +637,8 @@
     transitions.forEach((transition, index) => {
       const connectionId = `queue-consumer-highlight-${Date.now()}-${index}`;
 
-      // Create highlight
-      highlightConnection(transition.connection, connectionId);
+      // Create highlight with green color for queue-to-consumer
+      highlightConnection(transition.connection, connectionId, "green");
 
       // Start animation
       animateMessageSegmentWithoutHighlight(
@@ -558,7 +676,11 @@
     });
   }
 
-  function highlightConnection(connection, connectionId = null) {
+  function highlightConnection(
+    connection,
+    connectionId = null,
+    colorScheme = "red"
+  ) {
     const highlightGroup = svg.select(".connection-highlights");
 
     // For single connections, remove existing highlights
@@ -573,13 +695,31 @@
 
     const pathData = getConnectionPath(connection.from, connection.to);
 
+    // Define colors based on color scheme
+    const colors =
+      colorScheme === "green"
+        ? {
+            outer: "#6EE7B7", // Light green
+            middle: "#34D399", // Medium green
+            core: "#10B981", // Dark green
+            filter:
+              "drop-shadow(0 0 4px rgba(16, 185, 129, 1)) drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)) drop-shadow(0 0 12px rgba(110, 231, 183, 0.6))",
+          }
+        : {
+            outer: "#FFA500", // Orange
+            middle: "#FF6B35", // Red-orange
+            core: "#FF4444", // Red
+            filter:
+              "drop-shadow(0 0 4px rgba(255, 68, 68, 1)) drop-shadow(0 0 8px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 12px rgba(255, 165, 0, 0.6))",
+          };
+
     // Add outer glow effect
     const outerGlow = highlightGroup
       .append("path")
       .attr("class", "connection-highlight-outer")
       .attr("id", `${highlightId}-outer`)
       .attr("d", pathData)
-      .attr("stroke", "#FFA500")
+      .attr("stroke", colors.outer)
       .attr("stroke-width", 6)
       .attr("fill", "none")
       .attr("stroke-linecap", "round")
@@ -591,7 +731,7 @@
       .attr("class", "connection-highlight-middle")
       .attr("id", `${highlightId}-middle`)
       .attr("d", pathData)
-      .attr("stroke", "#FF6B35")
+      .attr("stroke", colors.middle)
       .attr("stroke-width", 4)
       .attr("fill", "none")
       .attr("stroke-linecap", "round")
@@ -603,15 +743,17 @@
       .attr("class", "connection-highlight-core")
       .attr("id", `${highlightId}-core`)
       .attr("d", pathData)
-      .attr("stroke", "#FF4444")
+      .attr("stroke", colors.core)
       .attr("stroke-width", 2)
       .attr("fill", "none")
       .attr("stroke-linecap", "round")
-      .style(
-        "filter",
-        "drop-shadow(0 0 4px rgba(255, 68, 68, 1)) drop-shadow(0 0 8px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 12px rgba(255, 165, 0, 0.6))"
-      )
-      .attr("marker-end", "url(#arrowhead-active)");
+      .style("filter", colors.filter)
+      .attr(
+        "marker-end",
+        colorScheme === "green"
+          ? "url(#arrowhead-active-green)"
+          : "url(#arrowhead-active)"
+      );
 
     // Animate outer glow pulsing
     outerGlow
@@ -874,155 +1016,205 @@
       </div>
     </div>
 
-    <div class="flex h-full">
+    <div class="flex flex-col h-full">
       <!-- Chart Area -->
-      <div class="flex-1 relative h-96 overflow-hidden border-r">
-        <svg bind:this={svgElement} class="w-full h-full"></svg>
+      <div class="flex-1 relative overflow-hidden border-r">
+        <svg bind:this={svgElement} class="h-full"></svg>
       </div>
 
-      <!-- Legend -->
-      <div class="space-y-6 h-full pr-3 pt-3 pb-3 overflow-y-auto">
-        <!-- Producer -->
-        <div class="flex items-center justify-start space-x-3">
-          <svg width="48" height="24" viewBox="0 0 24 24" class="flex-shrink-0">
-            <defs>
-              <radialGradient
-                id="legendMessageGradient"
-                cx="50%"
-                cy="50%"
-                r="50%"
-              >
-                <stop offset="0%" style="stop-color:#FCA5A5;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
-              </radialGradient>
-              <radialGradient
-                id="legendFanoutMessageGradient"
-                cx="50%"
-                cy="50%"
-                r="50%"
-              >
-                <stop offset="0%" style="stop-color:#A7F3D0;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#10B981;stop-opacity:1" />
-              </radialGradient>
-            </defs>
-            <rect
-              x="2"
-              y="2"
-              width="20"
-              height="20"
-              rx="2"
-              fill="#3B82F6"
-              stroke="#ffffff"
-              stroke-width="1"
-              style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1))"
-            />
-          </svg>
-          <div>
-            <div class="text-sm font-medium text-neutral-900">Producer</div>
-            <div class="text-xs text-neutral-600">Sends messages</div>
-          </div>
-        </div>
-
-        <!-- Exchange -->
-        <div class="flex items-center justify-start space-x-3">
-          <svg width="48" height="24" viewBox="0 0 24 24" class="flex-shrink-0">
-            <rect
-              x="2"
-              y="2"
-              width="20"
-              height="20"
-              rx="2"
-              transform="rotate(45 12 12)"
-              fill="#8B5CF6"
-              stroke="#ffffff"
-              stroke-width="1"
-              style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1))"
-            />
-          </svg>
-          <div>
-            <div class="text-sm font-medium text-neutral-900">Exchange</div>
-            <div class="text-xs text-neutral-600">Routes messages</div>
-          </div>
-        </div>
-
-        <!-- Queue -->
-        <div class="flex items-center justify-start space-x-3">
-          <svg width="48" height="24" viewBox="0 0 24 24" class="flex-shrink-0">
-            <rect
-              x="-13"
-              y="2"
-              width="40"
-              height="20"
-              rx="10"
-              fill="#F59E0B"
-              stroke="#ffffff"
-              stroke-width="1"
-              transform="translate(12,0)"
-              style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1))"
-            />
-          </svg>
-          <div>
-            <div class="text-sm font-medium text-neutral-900">Queue</div>
-            <div class="text-xs text-neutral-600">Stores messages</div>
-          </div>
-        </div>
-
-        <!-- Consumer -->
-        <div class="flex items-center justify-start space-x-3">
-          <svg width="48" height="24" viewBox="0 0 24 24" class="flex-shrink-0">
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              fill="#10B981"
-              stroke="#ffffff"
-              stroke-width="1"
-              style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1))"
-            />
-          </svg>
-          <div>
-            <div class="text-sm font-medium text-neutral-900">Consumer</div>
-            <div class="text-xs text-neutral-600">Receives messages</div>
-          </div>
-        </div>
-
-        <!-- Original Message -->
-        <div class="flex items-center justify-start space-x-3">
-          <svg width="48" height="24" viewBox="0 0 24 24" class="flex-shrink-0">
-            <circle
-              cx="12"
-              cy="12"
-              r="5"
-              fill="url(#legendMessageGradient)"
-              stroke="#FF4444"
-              stroke-width="0.5"
-            />
-          </svg>
-          <div>
-            <div class="text-sm font-medium text-neutral-900">
-              Original Message
+      <div class="pt-3 pb-1 border-t overflow-y-auto items-center justify-center">
+        <h3 class="font-semibold px-3">Legend</h3>
+        <!-- Legend -->
+        <div class="grid grid-cols-6 px-3 pt-2 pb-2 overflow-y-auto items-center justify-center opacity-25 hover:opacity-100 transition-opacity">
+          <!-- Producer -->
+          <div class="flex items-center justify-start space-x-3">
+            <svg
+              viewBox="0 0 24 24"
+              class="flex-shrink-0 w-8 h-8 items-center justify-center"
+            >
+              <rect
+                rx="3"
+                class="fill-blue-500 stroke-white h-4 w-4 transform drop-shadow-md stroke-1"
+              />
+            </svg>
+            <div>
+              <div class="text-sm font-medium text-neutral-900">Producer</div>
+              <div class="text-xs text-neutral-600">Sends messages</div>
             </div>
-            <div class="text-xs text-neutral-600">Producer → Exchange</div>
           </div>
-        </div>
 
-        <!-- Fanout Message -->
-        <div class="flex items-center justify-start space-x-3">
-          <svg width="48" height="24" viewBox="0 0 24 24" class="flex-shrink-0">
-            <circle
-              cx="12"
-              cy="12"
-              r="5"
-              fill="url(#legendFanoutMessageGradient)"
-              stroke="#10B981"
-              stroke-width="0.5"
-            />
-          </svg>
-          <div>
-            <div class="text-sm font-medium text-neutral-900">
-              Fanout Message
+          <!-- Exchange -->
+          <div class="flex items-center justify-start space-x-3">
+            <svg viewBox="0 0 24 24" class="flex-shrink-0 w-8 h-8">
+              <rect
+                rx="3"
+                class="fill-purple-600 stroke-white h-4 w-4 transform rotate-45 drop-shadow-md stroke-1"
+              />
+            </svg>
+            <div>
+              <div class="text-sm font-medium text-neutral-900">Exchange</div>
+              <div class="text-xs text-neutral-600">Routes messages</div>
             </div>
-            <div class="text-xs text-neutral-600">Exchange → Consumers</div>
+          </div>
+
+          <!-- Queue -->
+          <div class="flex items-center justify-start space-x-3">
+            <svg
+              viewBox="0 0 24 24"
+              class="flex-shrink-0 w-12 h-7 rounded-full"
+            >
+              <rect
+                rx="8"
+                class="fill-amber-500 stroke-white h-4 w-8 transform drop-shadow-md stroke-1 rounded-full"
+              />
+            </svg>
+            <div>
+              <div class="text-sm font-medium text-neutral-900">Queue</div>
+              <div class="text-xs text-neutral-600">Stores messages</div>
+            </div>
+          </div>
+
+          <!-- Consumer -->
+          <div class="flex items-center justify-start space-x-3">
+            <svg
+              viewBox="0 0 24 24"
+              class="flex-shrink-0 w-8 h-8 items-center justify-center rounded-full"
+            >
+              <rect
+                rx="30"
+                class="fill-emerald-500 stroke-white h-4 w-4 transform drop-shadow-md rounded-full stroke-1"
+              />
+            </svg>
+            <div>
+              <div class="text-sm font-medium text-neutral-900">Consumer</div>
+              <div class="text-xs text-neutral-600">Receives messages</div>
+            </div>
+          </div>
+
+          <!-- Original Message -->
+          <div class="flex items-center justify-start space-x-3">
+            <svg
+              width="48"
+              height="24"
+              viewBox="0 0 24 24"
+              class="flex-shrink-0"
+            >
+              <g>
+                <rect
+                  width="16"
+                  height="12"
+                  rx="2"
+                  ry="2"
+                  fill="#FF4444"
+                  stroke="white"
+                  stroke-width="1"
+                  style="filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3))"
+                />
+                <line
+                  x1="3"
+                  y1="4"
+                  x2="13"
+                  y2="4"
+                  stroke="white"
+                  stroke-width="1"
+                  opacity="0.8"
+                />
+                <line
+                  x1="3"
+                  y1="6"
+                  x2="10"
+                  y2="6"
+                  stroke="white"
+                  stroke-width="1"
+                  opacity="0.6"
+                />
+                <line
+                  x1="3"
+                  y1="8"
+                  x2="12"
+                  y2="8"
+                  stroke="white"
+                  stroke-width="1"
+                  opacity="0.8"
+                />
+                <path
+                  d="M1 2 L8 7 L15 2"
+                  stroke="white"
+                  stroke-width="1"
+                  fill="none"
+                  opacity="0.7"
+                />
+              </g>
+            </svg>
+            <div>
+              <div class="text-sm font-medium text-neutral-900">
+                Original Message
+              </div>
+              <div class="text-xs text-neutral-600">Producer → Exchange</div>
+            </div>
+          </div>
+
+          <!-- Fanout Message -->
+          <div class="flex items-center justify-start space-x-3">
+            <svg
+              width="48"
+              height="24"
+              viewBox="0 0 24 24"
+              class="flex-shrink-0"
+            >
+              <g>
+                <rect
+                  width="16"
+                  height="12"
+                  rx="2"
+                  ry="2"
+                  fill="#10B981"
+                  stroke="white"
+                  stroke-width="1"
+                  style="filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3))"
+                />
+                <line
+                  x1="3"
+                  y1="4"
+                  x2="13"
+                  y2="4"
+                  stroke="white"
+                  stroke-width="1"
+                  opacity="0.8"
+                />
+                <line
+                  x1="3"
+                  y1="6"
+                  x2="10"
+                  y2="6"
+                  stroke="white"
+                  stroke-width="1"
+                  opacity="0.6"
+                />
+                <line
+                  x1="3"
+                  y1="8"
+                  x2="12"
+                  y2="8"
+                  stroke="white"
+                  stroke-width="1"
+                  opacity="0.8"
+                />
+                <path
+                  d="M1 2 L8 7 L15 2"
+                  stroke="white"
+                  stroke-width="1"
+                  fill="none"
+                  opacity="0.7"
+                />
+              </g>
+            </svg>
+            <div>
+              <div class="text-sm font-medium text-neutral-900">
+                Fanout Message
+              </div>
+              <div class="text-xs text-neutral-600">Exchange → Consumers</div>
+            </div>
           </div>
         </div>
       </div>
