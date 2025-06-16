@@ -14,6 +14,7 @@
   import DrawingPage from "./pages/DrawingPage.svelte";
   import SimulatorPage from "./pages/SimulatorPage.svelte";
   import ComparisonPage from "./pages/ComparisonPage.svelte";
+  import NewSimulationsPage from "./pages/NewSimulationsPage.svelte";
 
   let ws = null;
   let connected = false;
@@ -29,6 +30,7 @@
     drawing: DrawingPage,
     simulator: SimulatorPage,
     comparison: ComparisonPage,
+    newsimulations: NewSimulationsPage,
   };
 
   onMount(() => {

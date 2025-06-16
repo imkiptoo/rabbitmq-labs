@@ -11,7 +11,8 @@ const routes = {
   '/rpc': 'rpc',
   '/drawing': 'drawing',
   '/simulator': 'simulator',
-  '/comparison': 'comparison'
+  '/comparison': 'comparison',
+  '/newsimulations': 'newsimulations'
 };
 
 function updateRoute() {
