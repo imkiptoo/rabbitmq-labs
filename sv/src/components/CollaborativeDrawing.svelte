@@ -368,12 +368,7 @@
   }
 </script>
 
-<div class="space-y-6">
-  <div class="bg-blue-50 p-4 rounded-lg">
-    <h2 class="text-xl font-semibold text-blue-900 mb-2">Collaborative Drawing Canvas</h2>
-    <p class="text-blue-700">Draw together in real-time! All changes are instantly shared via RabbitMQ.</p>
-  </div>
-  
+<div class="space-y-3">
   <!-- Controls -->
   <div class="bg-white border rounded-lg p-4">
     <div class="flex flex-wrap items-center gap-4">
@@ -425,7 +420,7 @@
       
       <!-- Clear Button -->
       <button
-        class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+        class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
         on:click={handleClearCanvas}
         disabled={!connected}
       >
@@ -434,7 +429,7 @@
 
       <!-- Delete My Strokes Button -->
       <button
-        class="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+        class="px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
         on:click={handleDeleteMyStrokes}
         disabled={!connected}
       >

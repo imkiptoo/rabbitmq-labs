@@ -6,7 +6,7 @@
   export let connected;
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-red-50 p-4 rounded-lg">
     <h1 class="text-2xl font-semibold text-red-900 mb-2">RPC Status Checker</h1>
     <p class="text-red-700">Demonstrates request-reply pattern with correlation IDs for synchronous-style communication.</p>
@@ -39,6 +39,4 @@
   </div>
   
   <StatusChecker {ws} {connected} />
-  
-  <SinglePatternFlowSimulator demoType="rpc" {ws} {connected} />
 </div>

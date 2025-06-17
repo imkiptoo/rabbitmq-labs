@@ -619,7 +619,7 @@
   }
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <!-- Simulation Type Tabs -->
   <div class="bg-white border rounded-lg">
     <div class="border-b">
@@ -671,7 +671,7 @@
         <p class="text-sm text-neutral-600">Click a scenario below to see how each architecture handles it</p>
       </div>
       
-      <div class="flex items-center justify-center space-x-4 mb-4">
+      <div class="flex items-center justify-center space-x-3 mb-4">
         {#each Object.entries(scenarios) as [id, name]}
           <button
             class="px-6 py-3 rounded-lg border-2 transition-all font-medium {
@@ -686,7 +686,7 @@
         {/each}
       </div>
       
-      <div class="flex items-center justify-center space-x-4">
+      <div class="flex items-center justify-center space-x-3">
         <div class="grid grid-cols-2 gap-2">
           <button
             class="px-4 py-2 rounded-lg border-2 transition-colors {
@@ -715,23 +715,23 @@
   
   <!-- Controls -->
   <div class="flex items-center justify-between bg-neutral-50 p-4 rounded-lg">
-    <div class="flex items-center space-x-4">
+    <div class="flex items-center space-x-3">
       <button
-        class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         on:click={togglePlayback}
       >
         {isPlaying ? 'Pause' : 'Play'} Animation
       </button>
       
       <button
-        class="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+        class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         on:click={simulateMessage}
       >
         Simulate Message
       </button>
       
       <button
-        class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
         on:click={clearMessages}
       >
         Clear
@@ -770,7 +770,7 @@
       <p class="text-neutral-600">{currentDemo.description}</p>
     </div>
     
-    <div class="relative h-96 overflow-hidden">
+    <div class="relative px-3 py-1 overflow-hidden">
       <svg width="100%" height="100%" class="absolute inset-0">
         <!-- Connection lines -->
         {#each currentDemo.connections as connection}

@@ -6,7 +6,7 @@
   export let connected;
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-blue-50 p-4 rounded-lg">
     <h1 class="text-2xl font-semibold text-blue-900 mb-2">Message Logger</h1>
     <p class="text-blue-700">Demonstrates the basic producer-consumer pattern with simple message queuing.</p>
@@ -31,6 +31,4 @@
   </div>
   
   <MessageLogger {ws} {connected} />
-  
-  <SinglePatternFlowSimulator demoType="logger" {ws} {connected} />
 </div>

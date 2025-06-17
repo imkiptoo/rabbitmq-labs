@@ -94,7 +94,7 @@
     .slice(0, 10);
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-purple-50 p-4 rounded-lg">
     <h3 class="text-lg font-semibold text-purple-800 mb-2">Race to 100 Game Demo</h3>
     <p class="text-purple-700">
@@ -103,7 +103,7 @@
   </div>
 
   {#if !gameStarted}
-    <div class="text-center space-y-4">
+    <div class="text-center space-y-3">
       <div class="max-w-md mx-auto">
         <label for="player-name" class="block text-sm font-medium text-neutral-700 mb-2">
           Enter your player name:
@@ -114,7 +114,7 @@
           bind:value={playerName}
           on:keypress={handleKeyPress}
           placeholder="Your name..."
-          class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          class="w-full px-3 py-1 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         />
       </div>
       <button
@@ -131,7 +131,7 @@
   {:else}
     <div class="grid md:grid-cols-2 gap-6">
       <!-- Game Area -->
-      <div class="space-y-4">
+      <div class="space-y-3">
         <div class="text-center">
           <h4 class="text-2xl font-bold text-purple-800 mb-2">
             {playerName}'s Score: {myScore}
@@ -145,7 +145,7 @@
         </div>
 
         {#if gameOver}
-          <div class="text-center space-y-4">
+          <div class="text-center space-y-3">
             {#if winner === playerName}
               <div class="text-4xl">🎉</div>
               <h3 class="text-2xl font-bold text-green-600">Congratulations!</h3>
@@ -157,7 +157,7 @@
             {/if}
             <button
               on:click={resetGame}
-              class="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+              class="px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700"
             >
               Play Again
             </button>
@@ -178,7 +178,7 @@
       <!-- Leaderboard -->
       <div class="bg-neutral-50 p-4 rounded-lg">
         <h4 class="text-lg font-semibold text-neutral-800 mb-4">Live Leaderboard</h4>
-        <div class="space-y-2 max-h-96 overflow-y-auto">
+        <div class="space-y-2 max-px-3 py-1 overflow-y-auto">
           {#each sortedLeaderboard as [player, score], index (player)}
             <div class="flex items-center justify-between p-2 bg-white rounded border-l-4 {
               index === 0 ? 'border-yellow-500' : 

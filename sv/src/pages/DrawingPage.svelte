@@ -6,7 +6,7 @@
   export let connected;
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-purple-50 p-4 rounded-lg">
     <h1 class="text-2xl font-semibold text-purple-900 mb-2">Collaborative Drawing Board</h1>
     <p class="text-purple-700">Real-time collaborative drawing using RabbitMQ fanout exchange to broadcast drawing events to all connected users.</p>
@@ -35,6 +35,4 @@
   </div>
   
   <CollaborativeDrawing {ws} {connected} />
-  
-  <SinglePatternFlowSimulator demoType="drawing" {ws} {connected} />
 </div>

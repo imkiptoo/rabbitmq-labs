@@ -12,9 +12,8 @@
   import GamePage from "./pages/GamePage.svelte";
   import RpcPage from "./pages/RpcPage.svelte";
   import DrawingPage from "./pages/DrawingPage.svelte";
-  import SimulatorPage from "./pages/SimulatorPage.svelte";
   import ExchangeTypesPage from "./pages/ExchangeTypesPage.svelte";
-  import NewSimulationsPage from "./pages/NewSimulationsPage.svelte";
+  import CoreFeaturesPage from "./pages/CoreFeaturesPage.svelte";
 
   let ws = null;
   let connected = false;
@@ -28,9 +27,8 @@
     game: GamePage,
     rpc: RpcPage,
     drawing: DrawingPage,
-    simulator: SimulatorPage,
     'exchange-types': ExchangeTypesPage,
-    newsimulations: NewSimulationsPage,
+    'core-features': CoreFeaturesPage,
   };
 
   onMount(() => {

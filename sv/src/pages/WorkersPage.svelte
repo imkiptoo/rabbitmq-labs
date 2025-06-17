@@ -6,7 +6,7 @@
   export let connected;
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-green-50 p-4 rounded-lg">
     <h1 class="text-2xl font-semibold text-green-900 mb-2">Number Doubler Workers</h1>
     <p class="text-green-700">Demonstrates work queue pattern with multiple competing consumers for load balancing.</p>
@@ -35,6 +35,4 @@
   </div>
   
   <NumberDoubler {ws} {connected} />
-  
-  <SinglePatternFlowSimulator demoType="workers" {ws} {connected} />
 </div>

@@ -19,14 +19,13 @@
   
   const navItems = [
     { id: 'home', name: 'Home', href: '/', icon: 'ph:house-duotone' },
-    { id: 'exchange-types', name: 'Exchange Types', href: '/exchange-types', icon: 'ph:swap-duotone' },
     { id: 'logger', name: 'Message Logger', href: '/logger', icon: 'ph:mailbox-duotone' },
     { id: 'workers', name: 'Number Doubler', href: '/workers', icon: 'ph:calculator-duotone' },
     { id: 'game', name: 'Race to 100 Game', href: '/game', icon: 'ph:flag-checkered-duotone' },
     { id: 'rpc', name: 'Status Checker', href: '/rpc', icon: 'ph:arrows-clockwise-duotone' },
     { id: 'drawing', name: 'Collaborative Drawing', href: '/drawing', icon: 'ph:pencil-line-duotone' },
-    { id: 'simulator', name: 'Flow Simulator', href: '/simulator', icon: 'ph:play-pause-duotone' },
-    { id: 'newsimulations', name: 'New Simulations (D3)', href: '/newsimulations', icon: 'ph:chart-bar-duotone' }
+    { id: 'exchange-types', name: 'Exchange Types', href: '/exchange-types', icon: 'ph:swap-duotone' },
+    { id: 'core-features', name: 'Other RabbitMQ Features', href: '/core-features', icon: 'ph:play-pause-duotone' },
   ];
   
   $: activeRoute = $currentRoute;

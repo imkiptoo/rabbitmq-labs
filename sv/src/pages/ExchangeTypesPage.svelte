@@ -611,28 +611,6 @@
 
     // Start animation immediately
     animateMessage(simulatedMessage);
-
-    // Try to send to backend logger (optional - works with existing endpoint)
-    try {
-      const response = await fetch("http://localhost:3030/api/logger/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: `${activeTab} exchange simulation: ${JSON.stringify(requestPayload, null, 2)}`,
-        }),
-      });
-
-      if (response.ok) {
-        addLogEntry(`✅ Message sent to backend logger`, "success");
-      } else {
-        addLogEntry(`ℹ️ Backend unavailable - visualization only`, "info");
-      }
-    } catch (error) {
-      // Silently handle error - this is optional functionality
-      addLogEntry(`ℹ️ Running in demo mode - visualization only`, "info");
-    }
   }
 
   function clearMessages() {
@@ -1526,7 +1504,7 @@
     <div class="border-b">
       <nav class="flex space-x-0" aria-label="Tabs">
         <button
-          class="relative px-3 py-2 font-medium transition-colors duration-200 border-b-2 {activeTab ===
+          class="relative px-3 py-1 font-medium transition-colors duration-200 border-b-2 {activeTab ===
           'direct'
             ? 'text-green-600 border-green-600 bg-green-50'
             : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'}"
@@ -1587,7 +1565,7 @@
         </button>
       </nav>
     </div>
-    <div class="px-3 py-2">
+    <div class="px-3 py-1">
       <div class="text-gray-600 flex flex-col space-y-1">
         {#if activeTab === "direct"}
           <p>

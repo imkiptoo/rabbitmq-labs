@@ -12,7 +12,7 @@ const routes = {
   '/drawing': 'drawing',
   '/simulator': 'simulator',
   '/exchange-types': 'exchange-types',
-  '/newsimulations': 'newsimulations'
+  '/core-features': 'core-features'
 };
 
 function updateRoute() {

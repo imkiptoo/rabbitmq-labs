@@ -66,15 +66,8 @@
   }
 </script>
 
-<div class="space-y-6">
-  <div class="bg-green-50 p-4 rounded-lg">
-    <h3 class="text-lg font-semibold text-green-800 mb-2">Number Doubler Workers Demo</h3>
-    <p class="text-green-700">
-      This demo shows RabbitMQ work queues with multiple consumers. Numbers are processed by 3 different workers with random delays to simulate real work.
-    </p>
-  </div>
-
-  <div class="flex space-x-4 items-end">
+<div class="space-y-3">
+  <div class="flex space-x-3 items-end">
     <div class="flex-1">
       <label for="number-input" class="block text-sm font-medium text-neutral-700 mb-2">
         Enter a number to double:
@@ -85,7 +78,7 @@
         bind:value={number}
         on:keypress={handleKeyPress}
         placeholder="Enter any number..."
-        class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        class="w-full px-3 py-1 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
         disabled={loading}
       />
     </div>
@@ -93,7 +86,7 @@
     <button
       on:click={submitNumber}
       disabled={!number || loading || !connected}
-      class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-neutral-400 disabled:cursor-not-allowed flex items-center"
+      class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-neutral-400 disabled:cursor-not-allowed flex items-center"
     >
       {#if loading}
         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -108,7 +101,7 @@
 
     <button
       on:click={clearResults}
-      class="px-3 py-2 bg-neutral-600 text-white rounded-md hover:bg-neutral-700"
+      class="px-3 py-1 bg-neutral-600 text-white rounded-md hover:bg-neutral-700"
     >
       Clear Results
     </button>
@@ -122,7 +115,7 @@
       </div>
     </div>
 
-    <div class="grid gap-4 max-h-96 overflow-y-auto">
+    <div class="grid gap-4 max-px-3 py-1 overflow-y-auto">
       {#each results as result (result.id)}
         <div class="bg-white p-4 rounded border-l-4 border-green-500">
           <div class="flex justify-between items-start mb-2">

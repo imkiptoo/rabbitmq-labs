@@ -301,7 +301,7 @@
   }
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-gradient-to-r from-red-50 to-blue-50 p-6 rounded-lg">
     <h2 class="text-2xl font-semibold text-neutral-900 mb-3">Traditional vs Message Broker Architecture</h2>
     <p class="text-neutral-700 mb-4">Compare how traditional microservices and message broker patterns handle challenges:</p>
@@ -334,7 +334,7 @@
       <p class="text-sm text-neutral-600">Click a scenario below to see how each architecture handles it</p>
     </div>
     
-    <div class="flex items-center justify-center space-x-4 mb-4">
+    <div class="flex items-center justify-center space-x-3 mb-4">
       {#each Object.entries(scenarios) as [id, name]}
         <button
           class="px-6 py-3 rounded-lg border-2 transition-all font-medium {
@@ -349,16 +349,16 @@
       {/each}
     </div>
     
-    <div class="flex items-center justify-center space-x-4">
+    <div class="flex items-center justify-center space-x-3">
       <button
-        class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         on:click={togglePlayback}
       >
         {isPlaying ? '⏸️ Pause' : '▶️ Play'} Auto Demo
       </button>
       
       <button
-        class="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+        class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         on:click={simulateRequest}
       >
         🚀 Send Test Request

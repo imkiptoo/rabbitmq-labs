@@ -414,7 +414,7 @@
 
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-blue-50 p-4 rounded-lg">
     <h2 class="text-xl font-semibold text-blue-900 mb-2">Message Flow Simulator</h2>
     <p class="text-blue-700">Visualize how messages flow through RabbitMQ patterns in real-time</p>
@@ -439,23 +439,23 @@
   
   <!-- Controls -->
   <div class="flex items-center justify-between bg-neutral-50 p-4 rounded-lg">
-    <div class="flex items-center space-x-4">
+    <div class="flex items-center space-x-3">
       <button
-        class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         on:click={togglePlayback}
       >
         {isPlaying ? 'Pause' : 'Play'} Animation
       </button>
       
       <button
-        class="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+        class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         on:click={simulateMessage}
       >
         Simulate Message
       </button>
       
       <button
-        class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
         on:click={clearMessages}
       >
         Clear
@@ -494,7 +494,7 @@
       <p class="text-neutral-600">{currentDemo.description}</p>
     </div>
     
-    <div class="relative h-96 overflow-hidden">
+    <div class="relative px-3 py-1 overflow-hidden">
       <svg width="100%" height="100%" class="absolute inset-0">
         <!-- Connection lines -->
         {#each currentDemo.connections as connection}

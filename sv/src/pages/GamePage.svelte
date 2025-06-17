@@ -6,7 +6,7 @@
   export let connected;
 </script>
 
-<div class="space-y-6">
+<div class="space-y-3">
   <div class="bg-yellow-50 p-4 rounded-lg">
     <h1 class="text-2xl font-semibold text-yellow-900 mb-2">Race to 100 Game</h1>
     <p class="text-yellow-700">Demonstrates fanout exchange pattern with pub/sub messaging for real-time multiplayer updates.</p>
@@ -35,6 +35,4 @@
   </div>
   
   <RaceGame {ws} {connected} />
-  
-  <SinglePatternFlowSimulator demoType="game" {ws} {connected} />
 </div>

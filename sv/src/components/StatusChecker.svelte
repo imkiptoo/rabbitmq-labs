@@ -80,19 +80,12 @@
   }
 </script>
 
-<div class="space-y-6">
-  <div class="bg-orange-50 p-4 rounded-lg">
-    <h3 class="text-lg font-semibold text-orange-800 mb-2">Task Status Checker Demo</h3>
-    <p class="text-orange-700">
-      This demo shows RabbitMQ RPC (request/reply) pattern. The client sends a request and waits for a response from the server.
-    </p>
-  </div>
-
-  <div class="text-center space-y-4">
+<div class="space-y-3">
+  <div class="space-x-3 flex">
     <button
       on:click={checkStatus}
       disabled={loading || !connected}
-      class="px-8 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-lg font-semibold flex items-center justify-center mx-auto"
+      class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-neutral-400 disabled:cursor-not-allowed font-semibold flex items-center justify-center"
     >
       {#if loading}
         <svg class="animate-spin -ml-1 mr-3 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -112,7 +105,7 @@
     <div class="flex justify-center">
       <button
         on:click={clearHistory}
-        class="px-3 py-2 bg-neutral-600 text-white rounded-md hover:bg-neutral-700 text-sm"
+        class="px-3 py-1 bg-neutral-600 text-white rounded-md hover:bg-neutral-700 text-sm"
       >
         Clear History
       </button>
@@ -127,7 +120,7 @@
       </div>
     </div>
 
-    <div class="space-y-3 max-h-96 overflow-y-auto">
+    <div class="space-y-3 max-px-3 py-1 overflow-y-auto">
       {#each statusHistory as entry (entry.id)}
         <div class="bg-white p-4 rounded border-l-4 {entry.success ? 'border-green-500' : 'border-red-500'}">
           <div class="flex justify-between items-start mb-2">
